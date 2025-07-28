@@ -26,6 +26,7 @@ rustyscript = "0.7"
 [dev-dependencies]
 tokio-test = "0.4"
 reqwest = { version = "0.11", features = ["json"] }
+criterion = { version = "0.5", features = ["html_reports"] }
 
 [[example]]
 name = "basic_usage"
@@ -34,3 +35,7 @@ path = "examples/basic_usage.rs"
 [[example]]
 name = "comprehensive_examples"
 path = "examples/comprehensive_examples.rs"
+
+[[bench]]
+name = "sift_benchmarks"
+harness = false
