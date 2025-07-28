@@ -1,0 +1,16 @@
+{
+  "name": "sift-benchmark-comparison",
+  "version": "1.0.0",
+  "description": "Benchmark comparison between sift-rs and sift.js",
+  "main": "benchmark.js",
+  "scripts": {
+    "benchmark": "node benchmark.js",
+    "install-deps": "npm install"
+  },
+  "dependencies": {
+    "sift": "^17.1.3",
+    "benchmark": "^2.1.4"
+  },
+  "author": "Sift-rs Benchmarks",
+  "license": "MIT"
+}
