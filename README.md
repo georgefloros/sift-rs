@@ -309,40 +309,55 @@ The following comprehensive benchmark results were obtained using `cargo bench` 
 All benchmarks were performed on high-complexity nested business data structures, demonstrating real-world performance characteristics. The sift-rs library shows excellent performance across all MongoDB-style operators.
 
 
-## Sift-rs vs. Sift.js Benchmark Comparison
-
 ### Overview
 
 The following is a comparison of sift-rs and sift.js benchmark results, demonstrating the efficiency and performance gains of the Rust-based implementation over its JavaScript counterpart. All measurements are averaged over multiple iterations using high-complexity business data structures.
 
-### Basic Comparison Operators
-- **$eq operator**: sift-rs - 1.61 µs, sift.js - 4.08 µs
-- **$gt operator**: sift-rs - 1.61 µs, sift.js - 4.11 µs
-- **$gte operator**: sift-rs - 1.58 µs, sift.js - 4.13 µs
+### Basic Comparisons
+- **$eq operator**: sift-rs - 2.59 µs, sift.js - 4.15 µs (1.60x faster)
+- **$ne operator**: sift-rs - 2.55 µs, sift.js - 4.12 µs (1.62x faster)
+- **$gt operator**: sift-rs - 2.59 µs, sift.js - 4.14 µs (1.60x faster)
+- **$gte operator**: sift-rs - 2.48 µs, sift.js - 4.14 µs (1.67x faster)
+- **$lt operator**: sift-rs - 2.54 µs, sift.js - 4.14 µs (1.63x faster)
+- **$lte operator**: sift-rs - 2.48 µs, sift.js - 4.14 µs (1.67x faster)
 
 ### Array Operations
-- **$in operator**: sift-rs - 1.75 µs, sift.js - 7.77 µs
-- **$all operator**: sift-rs - 1.73 µs, sift.js - 5.77 µs
+- **$in operator**: sift-rs - 2.98 µs, sift.js - 7.59 µs (2.55x faster)
+- **$nin operator**: sift-rs - 2.81 µs, sift.js - 6.60 µs (2.35x faster)
+- **$all operator**: sift-rs - 2.82 µs, sift.js - 5.72 µs (2.03x faster)
+- **$size operator**: sift-rs - 2.49 µs, sift.js - 4.25 µs (1.71x faster)
 
 ### Logical Operations
-- **$and operator**: sift-rs - 5.54 µs, sift.js - 6.65 µs
-- **$or operator**: sift-rs - 5.51 µs, sift.js - 6.68 µs
+- **$and operator**: sift-rs - 8.38 µs, sift.js - 6.66 µs
+- **$or operator**: sift-rs - 8.29 µs, sift.js - 6.53 µs
+- **$not operator**: sift-rs - 4.86 µs, sift.js - 4.58 µs
+- **$nor operator**: sift-rs - 8.48 µs, sift.js - 6.64 µs
 
 ### Field Operations
-- **$exists operator**: sift-rs - 1.61 µs, sift.js - 4.14 µs
-- **$regex operator**: sift-rs - 13.33 µs, sift.js - 4.24 µs
+- **$exists operator**: sift-rs - 2.52 µs, sift.js - 4.21 µs (1.67x faster)
+- **$type operator**: sift-rs - 2.58 µs, sift.js - 4.17 µs (1.62x faster)
+- **$regex operator**: sift-rs - 19.39 µs, sift.js - 4.27 µs (0.22x faster)
+- **$mod operator**: sift-rs - 2.57 µs, sift.js - 4.16 µs (1.62x faster)
 
 ### Complex Queries
-- **Complex nested query**: sift-rs - 5.47 µs, sift.js - 12.17 µs
-- **$elemMatch query**: sift-rs - 23.94 µs, sift.js - 16.23 µs
+- **Complex nested query**: sift-rs - 8.47 µs, sift.js - 11.87 µs
+- **$elemMatch query**: sift-rs - 37.89 µs, sift.js - 15.87 µs
+
+### $where Operations
+- **$where logic**: sift-rs - 6813.50 µs, sift.js - 4.43 µs
+
+### Filter Creation
+- **Direct sift calls**: sift-rs - 2.40 µs, sift.js - 4.03 µs (1.68x faster)
+- **Using create_filter**: sift-rs - 2.09 µs, sift.js - 4.05 µs (1.94x faster)
+
+### Memory Allocation
 
 ### Key Performance Insights
-- **sift-rs consistently outperforms sift.js** on basic comparisons and array operations.
-- **sift.js regex operations are faster**, highlighting specific optimization in JavaScript VMs.
-- **Complex queries benefit significantly from sift-rs**, showcasing Rust's efficiency in managing nested structures.
-- Overall, sift-rs provides superior performance capabilities in many areas, leveraging Rust's strengths in speed and optimization.
+- **sift-rs outperforms sift.js** in 16 out of 23 benchmarks.
+- **Biggest sift-rs advantage**: $in operator (2.55x faster)
+- **Biggest sift.js advantage**: $where logic (1538.04x faster)
 
----
+Overall, sift-rs provides superior performance capabilities in most areas, leveraging Rust's strengths in speed and optimization.
 
 ## Contributing
 

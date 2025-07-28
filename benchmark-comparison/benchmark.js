@@ -118,62 +118,85 @@ const suite = new Benchmark.Suite();
 const results = {};
 const outputJson = process.argv.includes('--json');
 
+// $where Operations
+suite.add('$where Operations/$where logic', () => {
+    const query = sift({ $where: "this.company.employees.length > 1" });
+    data.filter(query).length;
+});
+
+// Filter Creation
+suite.add('Filter Creation/Direct sift calls', () => {
+    const query = { 'age': { $gte: 25 } };
+    const filtered = data.filter(sift(query));
+    filtered.length;
+});
+
+suite.add('Filter Creation/Using create_filter', () => {
+    const query = { 'age': { $gte: 25 } };
+    const filter = sift(query); // Pre-create the filter
+    const filtered = data.filter(filter);
+    filtered.length;
+});
+
 if (!outputJson) {
     console.log('Starting sift.js Performance Benchmarks...');
     console.log('=============================================\n');
 }
 
-suite.add('$eq operator', () => {
+// Basic Comparisons
+suite.add('Basic Comparisons/$eq operator', () => {
     const query = sift({ 'company.employees.0.age': { $eq: 45 } });
     data.filter(query).length;
 });
 
-suite.add('$ne operator', () => {
+suite.add('Basic Comparisons/$ne operator', () => {
     const query = sift({ 'company.industry': { $ne: 'healthcare' } });
     data.filter(query).length;
 });
 
-suite.add('$gt operator', () => {
+suite.add('Basic Comparisons/$gt operator', () => {
     const query = sift({ 'company.financials.revenue.2023': { $gt: 10000000 } });
     data.filter(query).length;
 });
 
-suite.add('$gte operator', () => {
+suite.add('Basic Comparisons/$gte operator', () => {
     const query = sift({ 'company.employees.0.salary': { $gte: 200000 } });
     data.filter(query).length;
 });
 
-suite.add('$lt operator', () => {
+suite.add('Basic Comparisons/$lt operator', () => {
     const query = sift({ 'company.employees.2.age': { $lt: 40 } });
     data.filter(query).length;
 });
 
-suite.add('$lte operator', () => {
+suite.add('Basic Comparisons/$lte operator', () => {
     const query = sift({ 'company.projects.0.budget': { $lte: 3000000 } });
     data.filter(query).length;
 });
 
-suite.add('$in operator', () => {
+// Array Operations
+suite.add('Array Operations/$in operator', () => {
     const query = sift({ 'company.projects.0.status': { $in: ['active', 'pending', 'completed'] } });
     data.filter(query).length;
 });
 
-suite.add('$nin operator', () => {
+suite.add('Array Operations/$nin operator', () => {
     const query = sift({ 'company.projects.0.status': { $nin: ['cancelled', 'suspended'] } });
     data.filter(query).length;
 });
 
-suite.add('$all operator', () => {
+suite.add('Array Operations/$all operator', () => {
     const query = sift({ 'company.employees.0.skills': { $all: ['leadership', 'strategy'] } });
     data.filter(query).length;
 });
 
-suite.add('$size operator', () => {
+suite.add('Array Operations/$size operator', () => {
     const query = sift({ 'company.employees': { $size: 3 } });
     data.filter(query).length;
 });
 
-suite.add('$and operator', () => {
+// Logical Operations
+suite.add('Logical Operations/$and operator', () => {
     const query = sift({
         $and: [
             { 'company.industry': 'software' },
@@ -183,7 +206,7 @@ suite.add('$and operator', () => {
     data.filter(query).length;
 });
 
-suite.add('$or operator', () => {
+suite.add('Logical Operations/$or operator', () => {
     const query = sift({
         $or: [
             { 'company.employees.0.age': { $gte: 50 } },
@@ -193,12 +216,12 @@ suite.add('$or operator', () => {
     data.filter(query).length;
 });
 
-suite.add('$not operator', () => {
+suite.add('Logical Operations/$not operator', () => {
     const query = sift({ 'company.industry': { $not: { $eq: 'healthcare' } } });
     data.filter(query).length;
 });
 
-suite.add('$nor operator', () => {
+suite.add('Logical Operations/$nor operator', () => {
     const query = sift({
         $nor: [
             { 'company.industry': 'healthcare' },
@@ -208,27 +231,29 @@ suite.add('$nor operator', () => {
     data.filter(query).length;
 });
 
-suite.add('$exists operator', () => {
+// Field Operations
+suite.add('Field Operations/$exists operator', () => {
     const query = sift({ 'company.employees.0.email': { $exists: true } });
     data.filter(query).length;
 });
 
-suite.add('$type operator', () => {
+suite.add('Field Operations/$type operator', () => {
     const query = sift({ 'company.employees.0.age': { $type: 'number' } });
     data.filter(query).length;
 });
 
-suite.add('$regex operator', () => {
+suite.add('Field Operations/$regex operator', () => {
     const query = sift({ 'company.employees.0.email': { $regex: /@techinnovate\.com$/ } });
     data.filter(query).length;
 });
 
-suite.add('$mod operator', () => {
+suite.add('Field Operations/$mod operator', () => {
     const query = sift({ 'company.employees.0.age': { $mod: [5, 0] } });
     data.filter(query).length;
 });
 
-suite.add('Complex nested query', () => {
+// Complex Queries
+suite.add('Complex Queries/Complex nested query', () => {
     const query = sift({
         $and: [
             { 'category': 'electronics' },
@@ -242,7 +267,7 @@ suite.add('Complex nested query', () => {
     data.filter(query).length;
 });
 
-suite.add('$elemMatch query', () => {
+suite.add('Complex Queries/$elemMatch query', () => {
     const query = sift({
         $and: [
             { 'company.industry': 'software' },
@@ -278,12 +303,12 @@ suite.on('cycle', (event) => {
     const benchmark = event.target;
     const opsPerSec = benchmark.hz;
     const timePerOp = (1 / opsPerSec) * 1000000;
-    
+
     results[benchmark.name] = {
         opsPerSec: opsPerSec,
         timePerOp: parseFloat(timePerOp.toFixed(2))
     };
-    
+
     if (!outputJson) {
         console.log(`${benchmark.name}: ${opsPerSec.toFixed(0).padStart(10)} ops/sec (${timePerOp.toFixed(2)} µs/op)`);
     }
