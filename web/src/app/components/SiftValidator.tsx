@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useDebounce } from 'use-debounce';
+import { Play } from 'lucide-react';
 import { JsonEditor } from './JsonEditor';
 import { QueryBuilder } from './QueryBuilder';
 import { ValidationResult } from './ValidationResult';
@@ -95,6 +96,24 @@ export const SiftValidator: React.FC = () => {
 
   const availableFields = extractFields(jsonInput);
 
+  // Manual validation function
+  const handleManualValidation = () => {
+    if (mongoQuery.trim() && jsonInput.trim()) {
+      validateQuery(mongoQuery, jsonInput);
+    }
+  };
+
+  // Check if validation can be performed
+  const canValidate = () => {
+    try {
+      const parsedQuery = JSON.parse(mongoQuery || '{}');
+      const parsedInput = JSON.parse(jsonInput || '{}');
+      return Object.keys(parsedQuery).length > 0 && Object.keys(parsedInput).length > 0;
+    } catch {
+      return false;
+    }
+  };
+
   // Validate whenever the debounced inputs change
   useEffect(() => {
     if (debouncedQuery.trim() && debouncedInput.trim()) {
@@ -151,6 +170,22 @@ export const SiftValidator: React.FC = () => {
             </div>
           </div>
         </div>
+      </div>
+
+      {/* Manual Validation Button */}
+      <div className="flex justify-center">
+        <button
+          onClick={handleManualValidation}
+          disabled={!canValidate() || isValidating}
+          className={`px-6 py-3 rounded-lg font-medium transition-colors flex items-center space-x-2 ${
+            canValidate() && !isValidating
+              ? 'bg-blue-600 text-white hover:bg-blue-700'
+              : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+          }`}
+        >
+          <Play className="w-5 h-5" />
+          <span>{isValidating ? 'Validating...' : 'Validate Query'}</span>
+        </button>
       </div>
 
       {/* Validation Result Section */}
