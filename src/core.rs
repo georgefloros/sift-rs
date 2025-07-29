@@ -10,7 +10,11 @@ pub trait Operation {
 
 /// Base trait for all query operations
 pub trait QueryOperator: Send + Sync {
-    fn create_operation(&self, params: &Value, parent_query: &Value) -> SiftResult<Box<dyn Operation>>;
+    fn create_operation(
+        &self,
+        params: &Value,
+        parent_query: &Value,
+    ) -> SiftResult<Box<dyn Operation>>;
     fn name(&self) -> &'static str;
 }
 
@@ -30,7 +34,7 @@ impl OperatorRegistry {
         let mut registry = OperatorRegistry {
             operators: HashMap::new(),
         };
-        
+
         // Register default operators
         registry.register_default_operators();
         registry
@@ -45,16 +49,18 @@ impl OperatorRegistry {
     }
 
     fn register_default_operators(&mut self) {
-        use crate::operations::*;
-        use crate::operation_modules::size_operation::SizeOperator;
         use crate::operation_modules::elem_match_operation::ElemMatchOperator;
-        use crate::operation_modules::logic_operations::{AndOperator, OrOperator, NorOperator, NotOperator};
         use crate::operation_modules::exists_operation::ExistsOperator;
-        use crate::operation_modules::regex_operation::RegexOperator;
+        use crate::operation_modules::logic_operations::{
+            AndOperator, NorOperator, NotOperator, OrOperator,
+        };
         use crate::operation_modules::mod_operation::ModOperator;
-        use crate::operation_modules::where_operation::WhereOperator;
+        use crate::operation_modules::regex_operation::RegexOperator;
+        use crate::operation_modules::size_operation::SizeOperator;
         use crate::operation_modules::type_operation::TypeOperator;
-        
+        use crate::operation_modules::where_operation::WhereOperator;
+        use crate::operations::*;
+
         self.register("$eq".to_string(), Box::new(EqOperator));
         self.register("$ne".to_string(), Box::new(NeOperator));
         self.register("$gt".to_string(), Box::new(GtOperator));
@@ -130,7 +136,10 @@ pub struct CompiledQuery {
 
 impl CompiledQuery {
     pub fn new(operations: Vec<Box<dyn Operation>>, context: QueryContext) -> Self {
-        CompiledQuery { operations, context }
+        CompiledQuery {
+            operations,
+            context,
+        }
     }
 
     pub fn test(&self, value: &Value) -> SiftResult<bool> {
@@ -144,7 +153,7 @@ impl CompiledQuery {
                 return Ok(false);
             }
         }
-        
+
         Ok(true)
     }
 }
@@ -166,7 +175,7 @@ pub mod utils {
                     _ => match (a.as_f64(), b.as_f64()) {
                         (Some(a), Some(b)) => (a - b).abs() < f64::EPSILON,
                         _ => false,
-                    }
+                    },
                 }
             }
             (Value::String(a), Value::String(b)) => a == b,
@@ -174,10 +183,11 @@ pub mod utils {
                 a.len() == b.len() && a.iter().zip(b.iter()).all(|(x, y)| values_equal(x, y))
             }
             (Value::Object(a), Value::Object(b)) => {
-                a.len() == b.len() && 
-                a.iter().all(|(key, value)| {
-                    b.get(key).map_or(false, |other_value| values_equal(value, other_value))
-                })
+                a.len() == b.len()
+                    && a.iter().all(|(key, value)| {
+                        b.get(key)
+                            .map_or(false, |other_value| values_equal(value, other_value))
+                    })
             }
             _ => false,
         }
@@ -186,12 +196,10 @@ pub mod utils {
     /// Compare two values numerically, returns Some(ordering) if both are numbers
     pub fn compare_numbers(a: &Value, b: &Value) -> Option<std::cmp::Ordering> {
         match (a, b) {
-            (Value::Number(a), Value::Number(b)) => {
-                match (a.as_f64(), b.as_f64()) {
-                    (Some(a), Some(b)) => Some(a.partial_cmp(&b).unwrap_or(std::cmp::Ordering::Equal)),
-                    _ => None,
-                }
-            }
+            (Value::Number(a), Value::Number(b)) => match (a.as_f64(), b.as_f64()) {
+                (Some(a), Some(b)) => Some(a.partial_cmp(&b).unwrap_or(std::cmp::Ordering::Equal)),
+                _ => None,
+            },
             _ => None,
         }
     }
@@ -199,17 +207,20 @@ pub mod utils {
     /// Compare two values, supporting both numbers and ISO8601 date strings
     pub fn compare_values(a: &Value, b: &Value) -> Option<std::cmp::Ordering> {
         use chrono::{DateTime, Utc};
-        
+
         // First try numeric comparison
         if let Some(ordering) = compare_numbers(a, b) {
             return Some(ordering);
         }
-        
+
         // Try date comparison if both are strings
         match (a, b) {
             (Value::String(a_str), Value::String(b_str)) => {
                 // Try to parse both as ISO8601 dates
-                match (a_str.parse::<DateTime<Utc>>(), b_str.parse::<DateTime<Utc>>()) {
+                match (
+                    a_str.parse::<DateTime<Utc>>(),
+                    b_str.parse::<DateTime<Utc>>(),
+                ) {
                     (Ok(a_date), Ok(b_date)) => Some(a_date.cmp(&b_date)),
                     _ => {
                         // Fall back to string comparison if not dates
@@ -248,7 +259,7 @@ pub mod utils {
     }
 
     /// Walk through array elements and nested paths
-    pub fn walk_array_values<F>(value: &Value, path: &str, mut callback: F) -> bool 
+    pub fn walk_array_values<F>(value: &Value, path: &str, mut callback: F) -> bool
     where
         F: FnMut(&Value) -> bool,
     {
@@ -260,7 +271,12 @@ pub mod utils {
         walk_value_recursive(value, &parts, 0, &mut callback)
     }
 
-    fn walk_value_recursive<F>(value: &Value, parts: &[&str], depth: usize, callback: &mut F) -> bool
+    fn walk_value_recursive<F>(
+        value: &Value,
+        parts: &[&str],
+        depth: usize,
+        callback: &mut F,
+    ) -> bool
     where
         F: FnMut(&Value) -> bool,
     {
@@ -309,7 +325,7 @@ pub mod utils {
     pub fn test_regex(value: &Value, pattern: &str, options: Option<&str>) -> SiftResult<bool> {
         if let Value::String(s) = value {
             let mut regex_pattern = pattern.to_string();
-            
+
             // Handle regex options
             if let Some(opts) = options {
                 if opts.contains('i') {
@@ -325,7 +341,7 @@ pub mod utils {
 
             let regex = Regex::new(&regex_pattern)
                 .map_err(|e| SiftError::InvalidQuery(format!("Invalid regex: {}", e)))?;
-            
+
             Ok(regex.is_match(s))
         } else {
             Ok(false)
@@ -364,7 +380,7 @@ mod tests {
         assert!(utils::values_equal(&json!("hello"), &json!("hello")));
         assert!(utils::values_equal(&json!([1, 2, 3]), &json!([1, 2, 3])));
         assert!(utils::values_equal(&json!({"a": 1}), &json!({"a": 1})));
-        
+
         assert!(!utils::values_equal(&json!(true), &json!(false)));
         assert!(!utils::values_equal(&json!(42), &json!(43)));
     }
@@ -380,18 +396,33 @@ mod tests {
             }
         });
 
-        assert_eq!(utils::get_nested_value(&value, "user.name"), Some(&json!("Alice")));
-        assert_eq!(utils::get_nested_value(&value, "user.profile.age"), Some(&json!(30)));
+        assert_eq!(
+            utils::get_nested_value(&value, "user.name"),
+            Some(&json!("Alice"))
+        );
+        assert_eq!(
+            utils::get_nested_value(&value, "user.profile.age"),
+            Some(&json!(30))
+        );
         assert_eq!(utils::get_nested_value(&value, "user.invalid"), None);
     }
 
     #[test]
     fn test_compare_numbers() {
         use std::cmp::Ordering;
-        
-        assert_eq!(utils::compare_numbers(&json!(1), &json!(2)), Some(Ordering::Less));
-        assert_eq!(utils::compare_numbers(&json!(2), &json!(1)), Some(Ordering::Greater)); 
-        assert_eq!(utils::compare_numbers(&json!(1), &json!(1)), Some(Ordering::Equal));
+
+        assert_eq!(
+            utils::compare_numbers(&json!(1), &json!(2)),
+            Some(Ordering::Less)
+        );
+        assert_eq!(
+            utils::compare_numbers(&json!(2), &json!(1)),
+            Some(Ordering::Greater)
+        );
+        assert_eq!(
+            utils::compare_numbers(&json!(1), &json!(1)),
+            Some(Ordering::Equal)
+        );
         assert_eq!(utils::compare_numbers(&json!(1), &json!("1")), None);
     }
 }
