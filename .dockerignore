@@ -1,0 +1,13 @@
+target/
+.git/
+.gitignore
+README.md
+README_API.md
+.DS_Store
+web/
+tests/
+*.sh
+*.js
+generate_comparison.js
+run_benchmarks.sh
+Cargo.lock

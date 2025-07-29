@@ -19,12 +19,65 @@ A Rust implementation of MongoDB query filtering, inspired by the JavaScript [si
 
 ## Installation
 
+### Library Usage
+
 Add this to your `Cargo.toml`:
 
 ```toml
 [dependencies]
 sift-rs = "0.1"
 serde_json = "1.0"
+```
+
+### Docker Deployment
+
+The project includes both a Rust API server and a Next.js web interface.
+
+#### Using Docker Compose (Recommended)
+
+```bash
+# Clone the repository
+git clone https://github.com/username/sift-rs.git
+cd sift-rs
+
+# Start both API and web interface
+docker-compose up --build
+```
+
+This will start:
+- **API Server**: `http://localhost:3000` 
+- **Web Interface**: `http://localhost:3001`
+
+#### Manual Docker Build
+
+```bash
+# Build and run API server
+docker build -t sift-rs-api .
+docker run -p 3000:3000 sift-rs-api
+
+# Build and run web interface
+cd web
+docker build -t sift-rs-web .
+docker run -p 3001:3001 -e NEXT_PUBLIC_SIFT_RS_API_URL=http://localhost:3000 sift-rs-web
+```
+
+#### Environment Variables
+
+**API Server:**
+- `PORT`: Server port (default: 3000)
+- `RUST_LOG`: Log level (default: info)
+
+**Web Interface:**
+- `PORT`: Web server port (default: 3001)
+- `NEXT_PUBLIC_SIFT_RS_API_URL`: API server URL (required)
+
+#### Local Development
+
+For local development, create a `.env.local` file in the `web` directory:
+
+```bash
+# web/.env.local
+NEXT_PUBLIC_SIFT_RS_API_URL=http://localhost:3000
 ```
 
 ## Quick Start
