@@ -217,29 +217,84 @@ export const QueryBuilder: React.FC<QueryBuilderProps> = ({
     updateQueryWithHistory(JSON.stringify(query, null, 2));
   }, [updateQueryWithHistory]);
 
+  // Parse query string into conditions (helper function)
+  const parseQueryIntoConditions = useCallback((queryString: string) => {
+    console.log('🔍 Parsing query into conditions:', queryString);
+    try {
+      const parsed = JSON.parse(queryString) as ParsedQuery;
+      const newConditions: QueryCondition[] = [];
+      let hasOr = false;
+
+      // Handle structured format: {$and: [...], $or: [...]}}
+      if (parsed.$and && Array.isArray(parsed.$and)) {
+        parsed.$and.forEach((condition: Record<string, unknown>) => {
+          const conditionObj = parseConditionFromQuery(condition, 'and');
+          if (conditionObj) newConditions.push(conditionObj);
+        });
+      }
+
+      if (parsed.$or && Array.isArray(parsed.$or)) {
+        hasOr = true;
+        parsed.$or.forEach((condition: Record<string, unknown>) => {
+          const conditionObj = parseConditionFromQuery(condition, 'or');
+          if (conditionObj) newConditions.push(conditionObj);
+        });
+      }
+
+      // Handle legacy format for backward compatibility
+      if (!parsed.$and && !parsed.$or) {
+        Object.entries(parsed).forEach(([field, condition]) => {
+          const conditionObj = parseConditionFromQuery({ [field]: condition }, 'and');
+          if (conditionObj) newConditions.push(conditionObj);
+        });
+      }
+
+      return { conditions: newConditions, hasOr };
+    } catch {
+      console.log('🔍 Parse error in parseQueryIntoConditions');
+      return { conditions: [], hasOr: false };
+    }
+  }, []);
+
   // Undo functionality
   const handleUndo = useCallback(() => {
     if (historyIndex > 0) {
       setIsUndoRedoOperation(true);
       const newIndex = historyIndex - 1;
+      const queryToRestore = queryHistory[newIndex];
+      
+      // Parse the query and update conditions immediately
+      const { conditions: newConditions, hasOr } = parseQueryIntoConditions(queryToRestore);
+      
       setHistoryIndex(newIndex);
-      onChange(queryHistory[newIndex]);
+      setConditions(newConditions);
+      setHasOrConditions(hasOr);
+      onChange(queryToRestore);
+      
       // Reset flag after a brief delay to allow state updates to complete
-      setTimeout(() => setIsUndoRedoOperation(false), 10);
+      setTimeout(() => setIsUndoRedoOperation(false), 1);
     }
-  }, [historyIndex, queryHistory, onChange]);
+  }, [historyIndex, queryHistory, onChange, parseQueryIntoConditions]);
 
   // Redo functionality
   const handleRedo = useCallback(() => {
     if (historyIndex < queryHistory.length - 1) {
       setIsUndoRedoOperation(true);
       const newIndex = historyIndex + 1;
+      const queryToRestore = queryHistory[newIndex];
+      
+      // Parse the query and update conditions immediately
+      const { conditions: newConditions, hasOr } = parseQueryIntoConditions(queryToRestore);
+      
       setHistoryIndex(newIndex);
-      onChange(queryHistory[newIndex]);
+      setConditions(newConditions);
+      setHasOrConditions(hasOr);
+      onChange(queryToRestore);
+      
       // Reset flag after a brief delay to allow state updates to complete
-      setTimeout(() => setIsUndoRedoOperation(false), 10);
+      setTimeout(() => setIsUndoRedoOperation(false), 1);
     }
-  }, [historyIndex, queryHistory, onChange]);
+  }, [historyIndex, queryHistory, onChange, parseQueryIntoConditions]);
 
 
   // Enable keyboard shortcuts
