@@ -1,4 +1,5 @@
 use anyhow::{Context, Result};
+use once_cell::sync::Lazy;
 use rig::completion::Prompt;
 use rig::prelude::*;
 use rig::providers::groq;
@@ -7,51 +8,10 @@ use tracing::{info, warn};
 
 use crate::models::AgentResponse;
 
-const SYSTEM_MESSAGE_TEMPLATE: &str = r#"
-You are an AI assistant for the Sift-rs Query Builder.
-Your goal is to help users build MongoDB-style queries by understanding their natural language requests.
-
-Instructions:
-1.  **Analyze the user's request** to understand their intent.
-2.  **Generate a MongoDB query** in JSON format that matches the request.
-3.  **Use ONLY the fields that exist in the provided data structure**.
-4.  **Provide a clear, concise explanation** of how the query works.
-5.  **Respond in JSON format** with the query and explanation.
-6.  **If the request is ambiguous**, ask clarifying questions.
-7.  **If the request references fields not in the schema**, suggest alternative fields.
-8.  **If the request is not a query**, respond as a helpful assistant.
-9.  **Use the $where operator ONLY if the user explicitly asks for it or mentions JavaScript-like expressions**.
-
-{schema_context}
-
-MongoDB Query Operators Reference (prioritize these over $where):
-- $eq: Equal to
-- $ne: Not equal to
-- $gt: Greater than
-- $gte: Greater than or equal to
-- $lt: Less than
-- $lte: Less than or equal to
-- $in: Value in array
-- $nin: Value not in array
-- $exists: Field exists
-- $regex: Regular expression match
-- $and: Logical AND
-- $or: Logical OR
-- $not: Logical NOT
-- $all: Array contains all values
-- $size: Array has specific length
-- $elemMatch: Array element matches query
-- $where: JavaScript expression (use ONLY when explicitly requested)
-
-Example Response Format:
-
-```json
-{{
-  "query": {{"age": {{"$gte": 21}}}},
-  "explanation": "This query finds documents where the 'age' field is greater than or equal to 21."
-}}
-```
-"#;
+static SIFT_RS_PROMPT: Lazy<String> = Lazy::new(|| {
+    std::env::var("SIFT_RS_PROMPT")
+        .unwrap_or_else(|_| "You are an AI assistant for the Sift-rs Query Builder.\nYour goal is to help users build MongoDB-style queries by understanding their natural language requests.\n".to_string())
+});
 
 #[derive(Clone)]
 pub struct ChatAgent {
@@ -88,7 +48,7 @@ impl ChatAgent {
         let schema_context = self.build_schema_context(schema, sample_data);
 
         // Create the system message with schema context
-        let system_message = SYSTEM_MESSAGE_TEMPLATE.replace("{schema_context}", &schema_context);
+        let system_message = SIFT_RS_PROMPT.replace("{schema_context}", &schema_context);
 
         let agent = self
             .client
@@ -166,8 +126,7 @@ impl ChatAgent {
             context.push_str("**Schema:**\n");
             context.push_str(&format!(
                 "```json\n{}\n```\n\n",
-                serde_json::to_string_pretty(schema_val)
-                    .unwrap_or_else(|_| schema_val.to_string())
+                serde_json::to_string_pretty(schema_val).unwrap_or_else(|_| schema_val.to_string())
             ));
         } else {
             context.push_str(
