@@ -11,7 +11,8 @@ export default function Home() {
             Sift-rs MongoDB Query Validator
           </h1>
           <p className="text-gray-600 max-w-2xl mx-auto">
-            Build and test MongoDB queries against JSON data in real-time using the sift-rs validation engine.
+            Build and test MongoDB queries against JSON data in real-time using the sift-rs validation engine. 
+            Use the AI chat assistant (bottom-right) to generate queries with natural language!
           </p>
         </div>
         <SiftValidator />

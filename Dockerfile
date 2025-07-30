@@ -1,5 +1,5 @@
 # Build stage
-FROM rust:1.85-slim as builder
+FROM rust:1.85-slim AS builder
 
 # Install build tools and dependencies needed for V8 compilation
 RUN apt-get update && apt-get install -y \
@@ -9,7 +9,8 @@ RUN apt-get update && apt-get install -y \
     cmake \
     git \
     python3 \
-    python3-distutils \
+    python3-setuptools \
+    python3-pip \
     curl \
     ca-certificates \
     && rm -rf /var/lib/apt/lists/*

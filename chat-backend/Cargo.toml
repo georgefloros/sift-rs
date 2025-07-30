@@ -1,0 +1,33 @@
+[package]
+name = "chat-backend"
+version = "0.1.0"
+edition = "2021"
+authors = ["Your Name <your.email@example.com>"]
+description = "AI Chat Backend for Sift Query Builder using Rig.rs"
+license = "MIT"
+
+[dependencies]
+# Rig.rs for AI integration
+rig-core = "0.16.0"
+# Web framework
+axum = { version = "0.8.4", features = ["ws"] }
+tokio = { version = "1.47.0", features = ["full"] }
+tower = "0.5.2"
+tower-http = { version = "0.6.6", features = ["cors", "trace"] }
+# WebSocket support for real-time chat
+futures = "0.3.31"
+futures-util = "0.3.31"
+# Serialization and HTTP
+serde = { version = "1.0.219", features = ["derive"] }
+serde_json = "1.0.141"
+reqwest = { version = "0.12.22", features = ["json"] }
+# Logging and tracing
+tracing = "0.1.41"
+tracing-subscriber = { version = "0.3.19", features = ["env-filter"] }
+# Error handling
+anyhow = "1.0.98"
+thiserror = "2.0.12"
+# Environment variables
+dotenv = "0.15"
+# UUID for message IDs
+uuid = { version = "1.17.0", features = ["v4"] }

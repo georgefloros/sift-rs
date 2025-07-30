@@ -6,6 +6,7 @@ import { Play } from 'lucide-react';
 import { JsonEditor } from './JsonEditor';
 import { QueryBuilder } from './QueryBuilder';
 import { ValidationResult } from './ValidationResult';
+import { ChatInterface } from './ChatInterface';
 
 interface ValidationResponse {
   valid: boolean;
@@ -193,6 +194,12 @@ export const SiftValidator: React.FC = () => {
         result={validationResult}
         error={validationError}
         isLoading={isValidating}
+      />
+      
+      {/* AI Chat Interface */}
+      <ChatInterface
+        onQueryUpdate={setMongoQuery}
+        jsonInput={jsonInput}
       />
     </div>
   );

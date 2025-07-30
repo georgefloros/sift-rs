@@ -10,4 +10,5 @@ tests/
 *.js
 generate_comparison.js
 run_benchmarks.sh
-Cargo.lock
+.env
+chat-backend/
