@@ -45,16 +45,64 @@ impl Query {
     pub fn from_object(obj: &Map<String, Value>) -> SiftResult<Self> {
         let mut conditions = HashMap::new();
 
-        for (key, value) in obj {
-            // Handle specific root-level operators
-            if matches!(key.as_str(), "$and" | "$or" | "$not" | "$nor" | "$where") {
-                // For root-level operators, create an Operations condition with the operator
-                let mut operations = HashMap::new();
-                operations.insert(key.clone(), value.clone());
-                conditions.insert(key.clone(), QueryCondition::Operations(operations));
-            } else {
-                let condition = Self::parse_condition(value)?;
-                conditions.insert(key.clone(), condition);
+        // Check if both $and and $or are present at the top level
+        let has_and = obj.contains_key("$and");
+        let has_or = obj.contains_key("$or");
+
+        if has_and && has_or {
+            // Both $and and $or are present - $or must be at top level with $and nested inside
+            // This is our rule: when both operators exist, $or is always the top-level operator
+            let mut and_value: Option<Value> = None;
+            let mut or_value: Option<Value> = None;
+            let mut other_conditions = HashMap::new();
+
+            for (key, value) in obj {
+                match key.as_str() {
+                    "$and" => {
+                        and_value = Some(value.clone());
+                    }
+                    "$or" => {
+                        or_value = Some(value.clone());
+                    }
+                    _ => {
+                        if matches!(key.as_str(), "$not" | "$nor" | "$where") {
+                            let mut operations = HashMap::new();
+                            operations.insert(key.clone(), value.clone());
+                            other_conditions.insert(key.clone(), QueryCondition::Operations(operations));
+                        } else {
+                            let condition = Self::parse_condition(value)?;
+                            other_conditions.insert(key.clone(), condition);
+                        }
+                    }
+                }
+            }
+
+            // Always nest $and inside $or when both are present
+            let mut nested_and_obj = Map::new();
+            nested_and_obj.insert("$and".to_string(), and_value.unwrap());
+            
+            let mut or_val = or_value.unwrap();
+            if let Value::Array(ref mut or_array) = or_val {
+                or_array.push(Value::Object(nested_and_obj));
+            }
+            
+            let mut operations = HashMap::new();
+            operations.insert("$or".to_string(), or_val);
+            conditions.insert("$or".to_string(), QueryCondition::Operations(operations));
+
+            // Add other conditions
+            conditions.extend(other_conditions);
+        } else {
+            // Normal processing when both $and and $or are not present
+            for (key, value) in obj {
+                if matches!(key.as_str(), "$and" | "$or" | "$not" | "$nor" | "$where") {
+                    let mut operations = HashMap::new();
+                    operations.insert(key.clone(), value.clone());
+                    conditions.insert(key.clone(), QueryCondition::Operations(operations));
+                } else {
+                    let condition = Self::parse_condition(value)?;
+                    conditions.insert(key.clone(), condition);
+                }
             }
         }
 

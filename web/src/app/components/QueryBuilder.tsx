@@ -55,6 +55,9 @@ export const QueryBuilder: React.FC<QueryBuilderProps> = ({
 
   // Flag to prevent circular updates during undo/redo
   const [isUndoRedoOperation, setIsUndoRedoOperation] = useState(false);
+  
+  // Flag to prevent circular updates when value is updated externally (e.g., from ChatInterface)
+  const [isExternalUpdate, setIsExternalUpdate] = useState(false);
 
   const operators = [
     { value: '$eq', label: 'Equals', description: 'field equals value' },
@@ -79,25 +82,37 @@ export const QueryBuilder: React.FC<QueryBuilderProps> = ({
     }
 
     console.log('🔍 Parse effect triggered, value:', value);
+    
+    // Mark this as an external update to prevent rebuilding
+    setIsExternalUpdate(true);
     try {
       const parsed = JSON.parse(value) as ParsedQuery;
       const newConditions: QueryCondition[] = [];
       let hasOr = false;
 
-      // Handle structured format: {$and: [...], $or: [...]}}
-      if (parsed.$and && Array.isArray(parsed.$and)) {
-        parsed.$and.forEach((condition: Record<string, unknown>) => {
-          const conditionObj = parseConditionFromQuery(condition, 'and');
-          if (conditionObj) newConditions.push(conditionObj);
+      // Handle structured format with recursive parsing for nested operators
+      const parseRecursively = (conditions: Record<string, unknown>[], group: 'and' | 'or') => {
+        conditions.forEach((condition: Record<string, unknown>) => {
+          // Check if this condition contains nested logical operators
+          if (condition.$and && Array.isArray(condition.$and)) {
+            parseRecursively(condition.$and, 'and');
+          } else if (condition.$or && Array.isArray(condition.$or)) {
+            hasOr = true;
+            parseRecursively(condition.$or, 'or');
+          } else {
+            const conditionObj = parseConditionFromQuery(condition, group);
+            if (conditionObj) newConditions.push(conditionObj);
+          }
         });
+      };
+
+      if (parsed.$and && Array.isArray(parsed.$and)) {
+        parseRecursively(parsed.$and, 'and');
       }
 
       if (parsed.$or && Array.isArray(parsed.$or)) {
         hasOr = true;
-        parsed.$or.forEach((condition: Record<string, unknown>) => {
-          const conditionObj = parseConditionFromQuery(condition, 'or');
-          if (conditionObj) newConditions.push(conditionObj);
-        });
+        parseRecursively(parsed.$or, 'or');
       }
 
       // Handle legacy format for backward compatibility
@@ -111,10 +126,16 @@ export const QueryBuilder: React.FC<QueryBuilderProps> = ({
       console.log('🔄 Updating conditions from parse effect, new length:', newConditions.length);
       setConditions(newConditions);
       setHasOrConditions(hasOr);
+      
+      // Reset external update flag after updating conditions
+      setTimeout(() => setIsExternalUpdate(false), 0);
     } catch {
       console.log('🔍 Parse error, clearing conditions');
       setConditions([]);
       setHasOrConditions(false);
+      
+      // Reset external update flag even on parse error
+      setTimeout(() => setIsExternalUpdate(false), 0);
     }
   }, [value, isUndoRedoOperation]);
 
@@ -134,6 +155,17 @@ export const QueryBuilder: React.FC<QueryBuilderProps> = ({
         expression: String(value),
         type: 'where',
       };
+    }
+
+    // Handle nested logical operators (due to our nesting rule)
+    if (field === '$and' && Array.isArray(value)) {
+      // This is a nested $and inside another operator, treat as and group
+      return null; // Will be handled by the recursive parsing
+    }
+    
+    if (field === '$or' && Array.isArray(value)) {
+      // This is a nested $or inside another operator, treat as or group
+      return null; // Will be handled by the recursive parsing
     }
 
     if (typeof value === 'object' && value !== null) {
@@ -195,23 +227,47 @@ export const QueryBuilder: React.FC<QueryBuilderProps> = ({
       return;
     }
 
-    const query: { $and: Record<string, unknown>[]; $or?: Record<string, unknown>[]; } = { $and: [] };
-    if (hasOr) {
-      query.$or = [];
-    }
-
+    const andConditions: Record<string, unknown>[] = [];
+    const orConditions: Record<string, unknown>[] = [];
+    
+    // Separate conditions by group
     newConditions.forEach((condition) => {
       if (condition.type === 'field') {
-        const targetGroup = condition.group === 'or' ? (query.$or || []) : query.$and;
-        targetGroup.push({ [condition.field]: { [condition.operator]: condition.value } });
+        const conditionObj = { [condition.field]: { [condition.operator]: condition.value } };
+        if (condition.group === 'or') {
+          orConditions.push(conditionObj);
+        } else {
+          andConditions.push(conditionObj);
+        }
       } else if (condition.type === 'where') {
         // $where conditions go to $and by default since they don't have groups
-        query.$and.push({ '$where': condition.expression });
+        andConditions.push({ '$where': condition.expression });
       }
     });
 
-    if (!hasOr) {
-      delete query.$or;
+    // Apply the rule: $and and $or cannot be both at top level
+    // If both are present, nest one inside the other based on which has conditions first
+    let query: Record<string, unknown>;
+    
+    if (andConditions.length > 0 && orConditions.length > 0) {
+      // Both $and and $or are present - always nest $and inside $or
+      const nestedAndCondition = { $and: andConditions };
+      query = {
+        $or: [...orConditions, nestedAndCondition]
+      };
+    } else if (andConditions.length > 0) {
+      // Only $and conditions
+      if (andConditions.length === 1) {
+        query = andConditions[0];
+      } else {
+        query = { $and: andConditions };
+      }
+    } else if (orConditions.length > 0) {
+      // Only $or conditions
+      query = { $or: orConditions };
+    } else {
+      // No conditions
+      query = {};
     }
 
     updateQueryWithHistory(JSON.stringify(query, null, 2));
@@ -225,20 +281,29 @@ export const QueryBuilder: React.FC<QueryBuilderProps> = ({
       const newConditions: QueryCondition[] = [];
       let hasOr = false;
 
-      // Handle structured format: {$and: [...], $or: [...]}}
-      if (parsed.$and && Array.isArray(parsed.$and)) {
-        parsed.$and.forEach((condition: Record<string, unknown>) => {
-          const conditionObj = parseConditionFromQuery(condition, 'and');
-          if (conditionObj) newConditions.push(conditionObj);
+      // Handle structured format with recursive parsing for nested operators
+      const parseRecursively = (conditions: Record<string, unknown>[], group: 'and' | 'or') => {
+        conditions.forEach((condition: Record<string, unknown>) => {
+          // Check if this condition contains nested logical operators
+          if (condition.$and && Array.isArray(condition.$and)) {
+            parseRecursively(condition.$and, 'and');
+          } else if (condition.$or && Array.isArray(condition.$or)) {
+            hasOr = true;
+            parseRecursively(condition.$or, 'or');
+          } else {
+            const conditionObj = parseConditionFromQuery(condition, group);
+            if (conditionObj) newConditions.push(conditionObj);
+          }
         });
+      };
+
+      if (parsed.$and && Array.isArray(parsed.$and)) {
+        parseRecursively(parsed.$and, 'and');
       }
 
       if (parsed.$or && Array.isArray(parsed.$or)) {
         hasOr = true;
-        parsed.$or.forEach((condition: Record<string, unknown>) => {
-          const conditionObj = parseConditionFromQuery(condition, 'or');
-          if (conditionObj) newConditions.push(conditionObj);
-        });
+        parseRecursively(parsed.$or, 'or');
       }
 
       // Handle legacy format for backward compatibility
@@ -364,9 +429,10 @@ export const QueryBuilder: React.FC<QueryBuilderProps> = ({
     onChange('{}');
   };
 
-  // Rebuild query when conditions change (but not during undo/redo)
+  // Rebuild query when conditions change (but not during undo/redo or external updates)
   useEffect(() => {
-    if (conditions.length > 0 && !isUndoRedoOperation) {
+    if (conditions.length > 0 && !isUndoRedoOperation && !isExternalUpdate) {
+      console.log('🔧 Rebuilding query from conditions change');
       buildQuery(conditions, hasOrConditions);
     }
   }, [buildQuery, conditions, hasOrConditions, isUndoRedoOperation]);
@@ -823,4 +889,6 @@ const useKeyboardShortcuts = (handleUndo: () => void, handleRedo: () => void) =>
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [handleUndo, handleRedo]);
 };
+
+export default QueryBuilder; // Ensure this is the final line
 

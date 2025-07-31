@@ -49,7 +49,7 @@ impl ChatAgent {
 
         // Create the system message with schema context
         let system_message = SIFT_RS_PROMPT.replace("{schema_context}", &schema_context);
-
+        info!("Using system message: {}", system_message);
         let agent = self
             .client
             .agent(&self.model)

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useDebounce } from 'use-debounce';
 import { Play } from 'lucide-react';
 import { JsonEditor } from './JsonEditor';
@@ -96,6 +96,12 @@ export const SiftValidator: React.FC = () => {
   };
 
   const availableFields = extractFields(jsonInput);
+
+  // Memoized query update function to prevent circular updates
+  const handleQueryUpdate = useCallback((newQuery: string) => {
+    console.log('ChatInterface updating query:', newQuery);
+    setMongoQuery(newQuery);
+  }, []);
 
   // Manual validation function
   const handleManualValidation = () => {
@@ -198,8 +204,9 @@ export const SiftValidator: React.FC = () => {
       
       {/* AI Chat Interface */}
       <ChatInterface
-        onQueryUpdate={setMongoQuery}
+        onQueryUpdate={handleQueryUpdate}
         jsonInput={jsonInput}
+        currentQuery={mongoQuery}
       />
     </div>
   );
