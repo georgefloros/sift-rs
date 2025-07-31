@@ -1,5 +1,5 @@
 # Build stage
-FROM node:20-alpine as builder
+FROM node:20-alpine AS builder
 
 # Set working directory
 WORKDIR /app
@@ -33,7 +33,7 @@ COPY --from=builder /app/.next ./.next
 COPY --from=builder /app/public ./public
 
 # Set default port (can be overridden)
-ENV PORT=3001
+ENV PORT=3002
 
 # Expose port
 EXPOSE $PORT

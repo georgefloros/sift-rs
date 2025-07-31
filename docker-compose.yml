@@ -1,6 +1,7 @@
 version: '3.8'
 
 services:
+  # Sift-rs API (existing)
   api:
     build:
       context: .
@@ -17,19 +18,48 @@ services:
       retries: 3
       start_period: 10s
 
-  web:
+  # Chat Backend (new)
+  chat-backend:
     build:
-      context: ./web
+      context: ./chat-backend
       dockerfile: Dockerfile
     ports:
       - "3001:3001"
     environment:
       - PORT=3001
-      - NEXT_PUBLIC_SIFT_RS_API_URL=http://api:3000
+      - SIFT_API_URL=http://api:3000
+      - RUST_LOG=info
+      # AI Provider Configuration
+      - GROQ_API_KEY=${GROQ_API_KEY}
+      - AI_API_BASE_URL=${AI_API_BASE_URL:-https://api.groq.com/openai/v1}
+      - AI_MODEL=${AI_MODEL:-llama-3.3-70b-versatile}
+      - SIFT_RS_PROMPT=${SIFT_RS_PROMPT}
+
     depends_on:
       - api
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3001"]
+      test: ["CMD", "curl", "-f", "http://localhost:3001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  # Web Frontend (updated)
+  web:
+    build:
+      context: ./web
+      dockerfile: Dockerfile
+    ports:
+      - "3002:3002"
+    environment:
+      - PORT=3002
+      - NEXT_PUBLIC_SIFT_RS_API_URL=http://localhost:3000
+      - NEXT_PUBLIC_CHAT_API_URL=ws://localhost:3001/ws
+    depends_on:
+      - api
+      - chat-backend
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3002"]
       interval: 30s
       timeout: 10s
       retries: 3
