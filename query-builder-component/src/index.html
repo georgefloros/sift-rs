@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html dir="ltr" lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, 
+      minimum-scale=1.0, maximum-scale=5.0" />
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <title>Query Builder Component Example</title>
+  <script type="module" src="/build/query-builder-component.esm.js"> </script>
+  <script nomodule src="/build/query-builder-component.js"></script>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI',
+        'Roboto', Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
+      margin: 0;
+      padding: 2rem;
+      background-color: #f9fafb;
+      color: #374151;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      background-color: #ffffff;
+      padding: 0;
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    }
+
+    h1 {
+      display: none; /* Hide the main title as it's not in the example */
+    }
+
+    /* Base styling for the query builder component */
+    query-builder-component::part(base) {
+      background-color: #ffffff;
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+      border: 1px solid #e5e7eb;
+    }
+    
+    /* Toolbar styling */
+    query-builder-component::part(toolbar) {
+      padding: 1rem;
+      border-bottom: 1px solid #e5e7eb;
+      background-color: #f9fafb;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    query-builder-component::part(toolbar) h3 {
+      color: #111827;
+      font-weight: 600;
+      font-size: 0.875rem;
+      margin: 0;
+    }
+    
+    /* Undo/Redo button styling */
+    query-builder-component::part(toolbar) .flex.items-center.space-x-1 {
+      display: flex;
+      gap: 0.25rem;
+    }
+    
+    query-builder-component::part(toolbar) button {
+      padding: 0.375rem;
+      border-radius: 0.375rem;
+      transition-colors: all 0.2s ease;
+      color: #4b5563;
+      border: none;
+      background: transparent;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    query-builder-component::part(toolbar) button:hover:not(:disabled) {
+      color: #2563eb;
+      background-color: #eff6ff;
+    }
+    
+    query-builder-component::part(toolbar) button:disabled {
+      color: #9ca3af;
+      cursor: not-allowed;
+    }
+    
+    /* Conditions list styling */
+    query-builder-component::part(conditions-list) {
+      background-color: #f9fafb;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      padding: 1rem;
+      margin: 0 1rem 1rem;
+    }
+    
+    query-builder-component::part(conditions-list) .mb-3 {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.75rem;
+    }
+    
+    query-builder-component::part(conditions-list) .text-sm.font-semibold.text-gray-900 {
+      color: #374151;
+      font-weight: 600;
+      font-size: 0.875rem;
+    }
+    
+    query-builder-component::part(conditions-list) .text-xs {
+      font-size: 0.75rem;
+    }
+    
+    query-builder-component::part(conditions-list) .bg-red-100 {
+      background-color: #fee2e2;
+      color: #b91c1c;
+      padding: 0.25rem 0.5rem;
+      border-radius: 0.375rem;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    
+    query-builder-component::part(conditions-list) .bg-red-100:hover {
+      background-color: #fecaca;
+    }
+    
+    /* Condition item styling */
+    query-builder-component::part(condition-item) {
+      background-color: #ffffff;
+      border: 1px solid #e5e7eb;
+      border-radius: 0.375rem;
+      padding: 0.5rem;
+      margin-bottom: 0.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    query-builder-component::part(condition-item) .flex.items-center.space-x-2 {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    query-builder-component::part(condition-item) .text-sm {
+      font-size: 0.875rem;
+    }
+    
+    query-builder-component::part(condition-item) .px-2.py-1.text-xs.rounded.font-bold.bg-blue-100.text-blue-800 {
+      background-color: #dbeafe;
+      color: #1e40af;
+      padding: 0.25rem 0.5rem;
+      border-radius: 0.25rem;
+      font-weight: 700;
+      font-size: 0.75rem;
+    }
+    
+    query-builder-component::part(condition-item) .px-2.py-1.text-xs.rounded.font-bold.bg-red-100.text-red-800 {
+      background-color: #fee2e2;
+      color: #991b1b;
+      padding: 0.25rem 0.5rem;
+      border-radius: 0.25rem;
+      font-weight: 700;
+      font-size: 0.75rem;
+    }
+    
+    query-builder-component::part(condition-item) .font-mono.text-blue-600 {
+      color: #2563eb;
+      font-family: monospace;
+    }
+    
+    query-builder-component::part(condition-item) .text-green-600 {
+      color: #059669;
+    }
+    
+    query-builder-component::part(condition-item) .text-purple-600 {
+      color: #7e22ce;
+    }
+    
+    /* Action buttons */
+    query-builder-component::part(condition-item) .flex.items-center.space-x-1 {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+    
+    query-builder-component::part(condition-item) .text-blue-500 {
+      color: #3b82f6;
+      border: none;
+      background: transparent;
+      padding: 0.25rem;
+      border-radius: 0.25rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    
+    query-builder-component::part(condition-item) .text-blue-500:hover {
+      color: #1d4ed8;
+      background-color: #eff6ff;
+    }
+    
+    query-builder-component::part(condition-item) .text-red-500 {
+      color: #ef4444;
+      border: none;
+      background: transparent;
+      padding: 0.25rem;
+      border-radius: 0.25rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    
+    query-builder-component::part(condition-item) .text-red-500:hover {
+      color: #b91c1c;
+      background-color: #fee2e2;
+    }
+    
+    /* Add form styling */
+    query-builder-component::part(add-form) {
+      background-color: #ffffff;
+      border: 1px solid #e5e7eb;
+      border-radius: 0.5rem;
+      padding: 1rem;
+      margin: 0 1rem 1rem;
+    }
+    
+    query-builder-component::part(add-form) .flex.items-center.justify-between {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+    
+    query-builder-component::part(add-form) .text-lg.font-semibold.text-gray-900 {
+      color: #111827;
+      font-weight: 600;
+      font-size: 1.125rem;
+    }
+    
+    query-builder-component::part(add-form) .text-gray-500 {
+      color: #6b7280;
+    }
+    
+    query-builder-component::part(add-form) .text-gray-500:hover {
+      color: #374151;
+    }
+    
+    query-builder-component::part(add-form) label {
+      display: block;
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: #374151;
+      margin-bottom: 0.5rem;
+    }
+    
+    query-builder-component::part(add-form) .flex.space-x-4 {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+    
+    query-builder-component::part(add-form) button {
+      padding: 0.5rem 1rem;
+      border-radius: 0.375rem;
+      font-size: 0.875rem;
+      font-weight: 500;
+      border: 1px solid transparent;
+      cursor: pointer;
+      transition-colors: all 0.2s ease;
+    }
+    
+    query-builder-component::part(add-form) button:first-child {
+      background-color: #2563eb;
+      color: #ffffff;
+    }
+    
+    query-builder-component::part(add-form) button:last-child {
+      background-color: #dcfce7;
+      color: #166534;
+    }
+    
+    query-builder-component::part(add-form) button:last-child:hover {
+      background-color: #bbf7d0;
+    }
+    
+    /* Form inputs */
+    query-builder-component::part(add-form) .css-b62m3t-container {
+      width: 100%;
+    }
+    
+    query-builder-component::part(add-form) .field-selection-dropdown__control,
+    query-builder-component::part(add-form) .operator-selection-dropdown__control {
+      border: 1px solid #d1d5db;
+      border-radius: 0.375rem;
+      padding: 0.25rem 0.5rem;
+      min-height: 2rem;
+      cursor: pointer;
+      background-color: #ffffff;
+    }
+    
+    query-builder-component::part(add-form) input[type="text"] {
+      width: 100%;
+      padding: 0.5rem;
+      border: 1px solid #d1d5db;
+      border-radius: 0.375rem;
+      font-size: 0.875rem;
+      color: #374151;
+    }
+    
+    query-builder-component::part(add-form) input[type="text"]:focus {
+      outline: none;
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+    }
+    
+    query-builder-component::part(add-form) .text-xs.text-gray-500 {
+      font-size: 0.75rem;
+      color: #6b7280;
+      margin-top: 0.25rem;
+    }
+    
+    /* Query preview styling */
+    query-builder-component::part(query-preview) {
+      background-color: #111827;
+      border-radius: 0.5rem;
+      padding: 1rem;
+      margin: 0 1rem 1rem;
+    }
+    
+    query-builder-component::part(query-preview) p {
+      color: #f9fafb;
+      font-weight: 600;
+      font-size: 0.875rem;
+      margin: 0 0 0.5rem 0;
+    }
+    
+    query-builder-component::part(query-preview) pre {
+      color: #f3f4f6;
+      white-space: pre-wrap;
+      word-break: break-all;
+      font-size: 0.875rem;
+      overflow-x: auto;
+      margin: 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2 class="text-xl font-bold mb-4">Default Query Builder</h2>
+    <query-builder-component id="queryBuilder">
+      <!-- Default toolbar will be used as per component's internal structure -->
+    </query-builder-component>
+  </div>
+
+  <div class="container mt-8">
+    <h2 class="text-xl font-bold mb-4">Customized Query Builder with Slots and Render Function</h2>
+    <query-builder-component id="customQueryBuilder">
+      <!-- Custom toolbar using slots -->
+      <div slot="toolbar">
+        <div class="flex items-center justify-between bg-blue-50 border border-blue-200 rounded-lg p-3" part="toolbar">
+          <div class="flex items-center space-x-2">
+            <h3 class="text-sm font-semibold text-blue-900">Custom Query Builder</h3>
+            <div class="flex items-center space-x-1">
+              <!-- Custom undo button -->
+              <slot name="undo-button">
+                <button class="p-1.5 rounded transition-colors text-blue-600 hover:text-blue-800 hover:bg-blue-100">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-undo2 lucide-undo-2 w-4 h-4" aria-hidden="true">
+                    <path d="M9 14 4 9l5-5"></path>
+                    <path d="M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5a5.5 5.5 0 0 1-5.5 5.5H11"></path>
+                  </svg>
+                </button>
+              </slot>
+              <!-- Custom redo button -->
+              <slot name="redo-button">
+                <button class="p-1.5 rounded transition-colors text-blue-600 hover:text-blue-800 hover:bg-blue-100">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-redo2 lucide-redo-2 w-4 h-4" aria-hidden="true">
+                    <path d="m15 14 5-5-5-5"></path>
+                    <path d="M20 9H9.5A5.5 5.5 0 0 0 4 14.5A5.5 5.5 0 0 0 9.5 20H13"></path>
+                  </svg>
+                </button>
+              </slot>
+            </div>
+          </div>
+          <!-- Add custom elements to the toolbar -->
+          <div class="flex items-center space-x-2">
+            <button class="px-3 py-1 text-xs bg-blue-100 text-blue-800 rounded-full hover:bg-blue-200">Help</button>
+            <button class="px-3 py-1 text-xs bg-purple-100 text-purple-800 rounded-full hover:bg-purple-200">Save</button>
+          </div>
+        </div>
+      </div>
+    </query-builder-component>
+  </div>
+
+  <script>
+    // Initialize the default query builder
+    const queryBuilder = document.getElementById('queryBuilder');
+    
+    // Set the JSON object input for default builder
+    const data = [
+      {
+        "name": "John Doe",
+        "age": 30,
+        "email": "john.doe@example.com",
+        "isVerified": true,
+        "address": {
+          "city": "New York",
+          "zip": "10001",
+          "country": "USA"
+        },
+        "tags": ["customer", "vip"]
+      }
+    ];
+    queryBuilder.jsonInput = data;
+
+    // Set localization for default builder
+    queryBuilder.localization = {
+      addForm: {
+        title: 'Add New Condition'
+      },
+      operators: {
+        '$eq': 'is equal to',
+        '$ne': 'is not equal to',
+        '$gt': 'is greater than',
+        '$gte': 'is greater than or equal to',
+        '$lt': 'is less than',
+        '$lte': 'is less than or equal to',
+        '$in': 'is in array',
+        '$nin': 'is not in array',
+        '$exists': 'exists',
+        '$regex': 'matches regex',
+        '$size': 'array size',
+        '$type': 'BSON type'
+      }
+    };
+
+    queryBuilder.addEventListener('queryChanged', event => {
+      console.log('Default Query Changed:', event.detail);
+    });
+
+    queryBuilder.addEventListener('historyUpdated', event => {
+      // The undo/redo buttons will be handled by the component's internal logic
+      const undoButton = document.querySelector('#queryBuilder [data-testid="undo-button"]');
+      const redoButton = document.querySelector('#queryBuilder [data-testid="redo-button"]');
+      
+      if (undoButton) {
+        if (event.detail.canUndo) {
+          undoButton.classList.remove('text-gray-400', 'cursor-not-allowed');
+          undoButton.classList.add('text-gray-600', 'hover:text-blue-600', 'hover:bg-blue-50');
+        } else {
+          undoButton.classList.add('text-gray-400', 'cursor-not-allowed');
+          undoButton.classList.remove('text-gray-600', 'hover:text-blue-600', 'hover:bg-blue-50');
+        }
+      }
+      
+      if (redoButton) {
+        if (event.detail.canRedo) {
+          redoButton.classList.remove('text-gray-400', 'cursor-not-allowed');
+          redoButton.classList.add('text-gray-600', 'hover:text-blue-600', 'hover:bg-blue-50');
+        } else {
+          redoButton.classList.add('text-gray-400', 'cursor-not-allowed');
+          redoButton.classList.remove('text-gray-600', 'hover:text-blue-600', 'hover:bg-blue-50');
+        }
+      }
+    });
+
+    // Initialize the customized query builder
+    const customQueryBuilder = document.getElementById('customQueryBuilder');
+    
+    // Set the JSON object input for custom builder
+    customQueryBuilder.jsonInput = data;
+
+    // Set localization for custom builder
+    customQueryBuilder.localization = {
+      addForm: {
+        title: 'Add New Custom Condition'
+      },
+      operators: {
+        '$eq': 'equals',
+        '$ne': 'not equals',
+        '$gt': 'greater than',
+        '$gte': 'greater than equal',
+        '$lt': 'less than',
+        '$lte': 'less than equal',
+        '$in': 'in array',
+        '$nin': 'not in array',
+        '$exists': 'exists',
+        '$regex': 'regex',
+        '$size': 'array size',
+        '$type': 'type'
+      }
+    };
+
+    // Add custom rendering function to customize condition display
+    customQueryBuilder.renderCondition = (condition) => {
+      if (condition.type === 'field') {
+        return `
+          <div class="flex items-center space-x-2 text-sm">
+            <span class="px-2 py-1 text-xs rounded font-bold bg-green-100 text-green-800">${condition.group.toUpperCase()}</span>
+            <span class="font-mono text-blue-600">${condition.field}</span>
+            <span class="text-yellow-600">${condition.operator}</span>
+            <span class="text-purple-600">${typeof condition.value === 'string' ? `"${condition.value}"` : JSON.stringify(condition.value)}</span>
+          </div>
+        `;
+      } else {
+        return `
+          <div class="flex items-center space-x-2 text-sm">
+            <span class="px-2 py-1 text-xs rounded font-bold bg-red-100 text-red-800">TOP-LEVEL</span>
+            <span class="font-mono text-red-600">$where</span>
+            <span class="text-purple-600">${condition.expression}</span>
+          </div>
+        `;
+      }
+    };
+
+    customQueryBuilder.addEventListener('queryChanged', event => {
+      console.log('Custom Query Changed:', event.detail);
+    });
+
+    customQueryBuilder.addEventListener('historyUpdated', event => {
+      console.log('Custom History Updated:', event.detail);
+    });
+  </script>
+</body>
+</html>
