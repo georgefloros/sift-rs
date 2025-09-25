@@ -16,6 +16,8 @@ A Rust implementation of MongoDB query filtering, inspired by the JavaScript [si
 - 📦 **Lightweight**: Minimal dependencies and small footprint
 - 🔧 **Extensible**: Support for custom query operators
 - 📚 **Well documented**: Comprehensive documentation with examples
+- 🌐 **WASM Support**: Now runs in browsers and Java applications via WebAssembly
+- 🧩 **$where Operator**: Now available in WASM builds using Boa JavaScript engine
 
 ## Installation
 
@@ -435,6 +437,94 @@ cargo fmt --check
 # Run clippy
 cargo clippy -- -D warnings
 ```
+
+### Building
+
+This project provides multiple ways to build for different targets:
+
+#### Using the Build Script
+
+For convenience, a build script is provided that supports building for all targets:
+
+```bash
+# Build everything (library, server, WASM, chat backend)
+./build.sh
+
+# Build specific targets
+./build.sh -t lib          # Build only the library
+./build.sh -t server       # Build only the server binary
+./build.sh -t wasm         # Build only WASM packages
+./build.sh -t chat         # Build only the chat backend
+./build.sh -t web          # Build only the web frontend
+
+# Clean before building
+./build.sh -c
+
+# See all options
+./build.sh -h
+```
+
+For Windows users, a PowerShell script is also available:
+```powershell
+# Build everything
+.\build.ps1
+
+# Build specific targets
+.\build.ps1 -Type server
+.\build.ps1 -Type wasm
+.\build.ps1 -Type chat
+```
+
+#### Using Make
+
+A Makefile is provided for systems with make available:
+
+```bash
+# Build all targets
+make
+
+# Build specific targets
+make lib                 # Build the library
+make server              # Build the server binary
+make wasm                # Build all WASM packages
+make wasm-web            # Build WASM for web
+make wasm-nodejs         # Build WASM for Node.js
+make wasm-bundler        # Build WASM for bundlers
+make chat                # Build chat backend
+make web                 # Build web frontend
+make test                # Run tests
+make bench               # Run benchmarks
+make clean               # Clean build artifacts
+```
+
+#### Manual Building
+
+You can also build manually using cargo:
+
+```bash
+# Build the library
+cargo build
+
+# Build the server binary
+cargo build --bin sift-rs-server --features server
+
+# Build WASM for web (requires wasm-pack)
+cd sift-rs-wasm
+wasm-pack build --target web --out-dir pkg
+
+# Build chat backend
+cd chat-backend
+cargo build
+```
+
+#### Build Artifacts
+
+- **Server**: `./target/debug/sift-rs-server` executable
+- **WASM (web)**: `./sift-rs-wasm/pkg/` directory
+- **WASM (Node.js)**: `./sift-rs-wasm/pkg-node/` directory
+- **WASM (bundler)**: `./sift-rs-wasm/pkg-bundler/` directory
+- **Chat Backend**: `./chat-backend/target/debug/chat-backend` executable
+- **Example Web App**: Uses WASM artifacts from `./sift-rs-wasm/pkg/`
 
 ## License
 

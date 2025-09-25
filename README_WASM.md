@@ -266,11 +266,11 @@ wasm-pack build --target bundler --out-dir pkg-bundler
 ### Features
 - MongoDB-style query filtering in WASM
 - Support for most MongoDB operators ($eq, $ne, $gt, $gte, $lt, $lte, $in, $nin, $exists, $regex, $and, $or, $not, $all, $size, $mod, $type, $elemMatch)
+- NEW: $where operator now available in WASM builds using Boa JavaScript engine
 - Type-safe query construction
 - Good performance for Rust
 
 ### Limitations
-- The $where operator is not available in WASM builds (only in server builds)
 - Requires JavaScript environment to run
 - Larger bundle size due to WASM runtime
 
@@ -281,3 +281,10 @@ To test the WASM module:
 1. Build the module: `cd sift-rs-wasm && wasm-pack build --target web --out-dir pkg`
 2. Open `example-web-app/index.html` in a browser
 3. Use the interface to test queries
+
+## Implementation Notes
+
+The $where operator implementation has been enhanced to use Boa JavaScript engine for WASM compatibility. This allows the $where operator to work in both server and WASM builds, replacing the previous rustyscript dependency which was not compatible with WASM. The implementation uses conditional compilation to use the most appropriate JavaScript engine for each target platform:
+
+- Server builds: rustyscript (if enabled)
+- WASM builds: Boa JavaScript engine

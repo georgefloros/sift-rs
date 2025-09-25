@@ -10,7 +10,7 @@ repository = "https://github.com/georgefloros/sift-rs"
 crate-type = ["cdylib"]
 
 [dependencies]
-sift-rs = { path = "..", default-features = false }
+sift-rs = { path = "..", default-features = false, features = ["wasm"] }
 wasm-bindgen = { version = "0.2", features = ["serde-serialize"] }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"

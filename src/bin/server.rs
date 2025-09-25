@@ -111,20 +111,20 @@ async fn main() {
     info!("Content-Type: application/json");
     info!("");
     info!("[");
-    info!("  {");
-    info!("    \"input\": {\"name\": \"Alice\", \"age\": 30},");
-    info!("    \"query\": {\"age\": {\"$gte\": 25}}");
-    info!("  },");
-    info!("  {");
-    info!("    \"input\": {\"name\": \"Bob\", \"age\": 20},");
-    info!("    \"query\": {\"age\": {\"$gte\": 25}}");
-    info!("  }");
+    info!("  {{");
+    info!("    \"input\": {{\"name\": \"Alice\", \"age\": 30}},");
+    info!("    \"query\": {{\"age\": {{\"$gte\": 25}}}}");
+    info!("  }},");
+    info!("  {{");
+    info!("    \"input\": {{\"name\": \"Bob\", \"age\": 20}},");
+    info!("    \"query\": {{\"age\": {{\"$gte\": 25}}}}");
+    info!("  }}");
     info!("]");
     info!("");
     info!("Response:");
     info!("[");
-    info!("  {\"valid\": true},");
-    info!("  {\"valid\": false}");
+    info!("  {{\"valid\": true}},");
+    info!("  {{\"valid\": false}}");
     info!("]");
 
     axum::serve(listener, app)
