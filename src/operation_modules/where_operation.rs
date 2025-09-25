@@ -1,13 +1,21 @@
+#[cfg(feature = "server")]
 use crate::core::{Operation, QueryOperator};
+#[cfg(feature = "server")]
 use crate::{SiftError, SiftResult};
+#[cfg(feature = "server")]
 use serde_json::Value;
+#[cfg(feature = "server")]
 use rustyscript::{Runtime, RuntimeOptions};
+#[cfg(feature = "server")]
 use std::sync::mpsc;
+#[cfg(feature = "server")]
 use std::thread;
 
 /// $where operator - evaluates JavaScript-like expressions
+#[cfg(feature = "server")]
 pub struct WhereOperator;
 
+#[cfg(feature = "server")]
 impl QueryOperator for WhereOperator {
     fn create_operation(&self, params: &Value, _parent_query: &Value) -> SiftResult<Box<dyn Operation>> {
         if let Some(expression) = params.as_str() {
@@ -22,10 +30,12 @@ impl QueryOperator for WhereOperator {
     }
 }
 
+#[cfg(feature = "server")]
 struct WhereOperation {
     expression: String,
 }
 
+#[cfg(feature = "server")]
 impl Operation for WhereOperation {
     fn test(&self, value: &Value, _key: Option<&str>, _parent: Option<&Value>) -> SiftResult<bool> {
         // Use RustyScript to evaluate the JavaScript expression
@@ -33,6 +43,7 @@ impl Operation for WhereOperation {
     }
 }
 
+#[cfg(feature = "server")]
 impl WhereOperation {
     fn evaluate_expression(&self, expr: &str, value: &Value) -> SiftResult<bool> {
         let expr = expr.to_string();
@@ -77,5 +88,27 @@ impl WhereOperation {
             Value::Array(arr) => Ok(!arr.is_empty()),
             Value::Object(obj) => Ok(!obj.is_empty()),
         }
+    }
+}
+
+// Provide a stub implementation when server feature is not enabled
+#[cfg(not(feature = "server"))]
+use crate::core::{Operation, QueryOperator};
+#[cfg(not(feature = "server"))]
+use crate::{SiftError, SiftResult};
+#[cfg(not(feature = "server"))]
+use serde_json::Value;
+
+#[cfg(not(feature = "server"))]
+pub struct WhereOperator;
+
+#[cfg(not(feature = "server"))]
+impl QueryOperator for WhereOperator {
+    fn create_operation(&self, _params: &Value, _parent_query: &Value) -> SiftResult<Box<dyn Operation>> {
+        Err(SiftError::UnsupportedOperation("$where operator is not available in this build".to_string()))
+    }
+    
+    fn name(&self) -> &'static str {
+        "$where"
     }
 }
