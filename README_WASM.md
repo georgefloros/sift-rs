@@ -284,7 +284,7 @@ To test the WASM module:
 
 ## Implementation Notes
 
-The $where operator implementation has been enhanced to use Boa JavaScript engine for WASM compatibility. This allows the $where operator to work in both server and WASM builds, replacing the previous rustyscript dependency which was not compatible with WASM. The implementation uses conditional compilation to use the most appropriate JavaScript engine for each target platform:
+The $where operator implementation now uses Boa JavaScript engine for all builds, both server and WASM. This provides consistent functionality across all platforms and removes the dependency on rustyscript. The implementation now uses a single JavaScript engine across all platforms:
 
-- Server builds: rustyscript (if enabled)
+- Server builds: Boa JavaScript engine
 - WASM builds: Boa JavaScript engine
