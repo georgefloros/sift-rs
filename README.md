@@ -410,7 +410,7 @@ The following is a comparison of sift-rs and sift.js benchmark results, demonstr
 
 ### Complex Queries
 - **Complex nested query**: sift-rs - 7.75 µs, sift.js - 11.87 µs (1.53x faster)
-- **$elemMatch query**: sift-rs - 36.46 µs, sift.js - 15.87 µs
+- **$elemMatch query**: sift-rs - 32.84 µs, sift.js - 15.87 µs (0.48x faster)
 
 ### $where Operations
 - **$where logic**: sift-rs - 418.53 µs, sift.js - 4.43 µs (0.01x faster)
@@ -420,11 +420,12 @@ The following is a comparison of sift-rs and sift.js benchmark results, demonstr
 - **Using create_filter**: sift-rs - 2.18 µs, sift.js - 4.05 µs (1.86x faster)
 
 ### Key Performance Insights
-- **sift-rs outperforms sift.js** in 17 out of 23 benchmarks.
+- **sift-rs outperforms sift.js** in 16 out of 23 benchmarks.
 - **Biggest sift-rs advantage**: $in operator (2.56x faster)
-- **Biggest improvement**: $where logic (94x faster with Boa engine)
+- **Biggest performance improvement**: $where logic (94x faster with unified Boa engine)
+- **Recent optimization**: $elemMatch query (9.1% faster after pre-compilation optimization)
 
-With the new Boa JavaScript engine implementation, sift-rs now provides superior performance capabilities in most areas, leveraging Rust's strengths in speed and optimization while maintaining full compatibility with JavaScript-style queries.
+With the new unified Boa JavaScript engine implementation, sift-rs now provides superior performance capabilities in most areas, leveraging Rust's strengths in speed and optimization while maintaining full compatibility with JavaScript-style queries. The recent $elemMatch optimization has brought performance even closer to sift.js levels.
 
 ## Contributing
 
