@@ -1,9 +1,6 @@
 use crate::core::{Operation, QueryOperator};
 use crate::{SiftError, SiftResult};
 use serde_json::Value;
-use rustyscript::{Runtime, RuntimeOptions};
-use std::sync::mpsc;
-use std::thread;
 
 /// $where operator - evaluates JavaScript-like expressions
 pub struct WhereOperator;
@@ -28,54 +25,44 @@ struct WhereOperation {
 
 impl Operation for WhereOperation {
     fn test(&self, value: &Value, _key: Option<&str>, _parent: Option<&Value>) -> SiftResult<bool> {
-        // Use RustyScript to evaluate the JavaScript expression
+        // Use Boa to evaluate the JavaScript expression
         self.evaluate_expression(&self.expression, value)
     }
 }
 
 impl WhereOperation {
     fn evaluate_expression(&self, expr: &str, value: &Value) -> SiftResult<bool> {
-        let expr = expr.to_string();
-        let value = value.clone();
+        use boa_engine::{Context, JsValue, Source};
         
-        // Run the JavaScript evaluation in a separate thread to avoid async context issues
-        let (tx, rx) = mpsc::channel();
+        // Create a JavaScript context
+        let mut context = Context::default();
         
-        thread::spawn(move || {
-            let result = Self::evaluate_js_in_thread(&expr, &value);
-            let _ = tx.send(result);
-        });
-        
-        rx.recv().map_err(|_| SiftError::EvaluationError("Thread communication failed".to_string()))?
-    }
-    
-    fn evaluate_js_in_thread(expr: &str, value: &Value) -> SiftResult<bool> {
-        // Create a new runtime for each evaluation
-        let mut runtime = Runtime::new(RuntimeOptions::default())
-            .map_err(|e| SiftError::EvaluationError(format!("Failed to initialize RustyScript: {}", e)))?;
-
         // Convert the JSON value to a JavaScript object string
-        let js_object = serde_json::to_string(value)
+        let js_object_str = serde_json::to_string(value)
             .map_err(|e| SiftError::EvaluationError(format!("Failed to serialize JSON: {}", e)))?;
         
         // Create a script that sets 'this' to our JSON object and evaluates the expression
         let script_code = format!(
             "const thisObj = {}; (function() {{ return {}; }}).call(thisObj);",
-            js_object, expr
+            js_object_str, expr
         );
 
-        // Execute the JavaScript expression
-        let result = runtime.eval::<serde_json::Value>(&script_code)
-            .map_err(|e| SiftError::EvaluationError(format!("Script execution error: {}", e)))?;
+        // Evaluate the script
+        let result = context.eval(Source::from_bytes(&script_code))
+            .map_err(|e| SiftError::EvaluationError(format!("JavaScript execution error: {:?}", e)))?;
 
         // Convert the result to a boolean
         match result {
-            Value::Bool(b) => Ok(b),
-            Value::Number(n) => Ok(n.as_f64().unwrap_or(0.0) != 0.0),
-            Value::String(s) => Ok(!s.is_empty()),
-            Value::Null => Ok(false),
-            Value::Array(arr) => Ok(!arr.is_empty()),
-            Value::Object(obj) => Ok(!obj.is_empty()),
+            JsValue::Boolean(b) => Ok(b),
+            JsValue::Integer(n) => Ok(n != 0),
+            JsValue::Rational(n) => Ok(n != 0.0),
+            JsValue::String(s) => {
+                let s_str = s.as_str();
+                Ok(!s_str.is_empty())
+            },
+            JsValue::Null | JsValue::Undefined => Ok(false),
+            JsValue::Object(_) => Ok(true), // Objects are truthy in JavaScript
+            _ => Ok(true), // Other types are generally truthy
         }
     }
 }
