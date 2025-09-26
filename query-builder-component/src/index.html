@@ -2,522 +2,872 @@
 <html dir="ltr" lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, 
-      minimum-scale=1.0, maximum-scale=5.0" />
-  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-  <title>Query Builder Component Example</title>
-  <script type="module" src="/build/query-builder-component.esm.js"> </script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=5.0" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <title>Query Builder Component - Customization Demo with Query Validation</title>
+  <script type="module" src="/build/query-builder-component.esm.js"></script>
   <script nomodule src="/build/query-builder-component.js"></script>
   <style>
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI',
-        'Roboto', Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', Helvetica, Arial, sans-serif;
       margin: 0;
-      padding: 2rem;
-      background-color: #f9fafb;
-      color: #374151;
-    }
-
-    .container {
-      max-width: 900px;
-      margin: 0 auto;
-      background-color: #ffffff;
       padding: 0;
-      border-radius: 8px;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
     }
 
-    h1 {
-      display: none; /* Hide the main title as it's not in the example */
+    .demo-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem;
     }
 
-    /* Base styling for the query builder component */
-    query-builder-component::part(base) {
-      background-color: #ffffff;
-      border-radius: 8px;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-      border: 1px solid #e5e7eb;
+    .demo-section {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+      margin-bottom: 2rem;
+      overflow: hidden;
     }
-    
-    /* Toolbar styling */
-    query-builder-component::part(toolbar) {
-      padding: 1rem;
-      border-bottom: 1px solid #e5e7eb;
-      background-color: #f9fafb;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
+
+    .demo-header {
+      background: linear-gradient(90deg, #3b82f6 0%, #8b5cf6 100%);
+      color: white;
+      padding: 1.5rem 2rem;
+      border-bottom: 4px solid rgba(59, 130, 246, 0.1);
     }
-    
-    query-builder-component::part(toolbar) h3 {
-      color: #111827;
-      font-weight: 600;
-      font-size: 0.875rem;
+
+    .demo-header h2 {
       margin: 0;
+      font-size: 1.5rem;
+      font-weight: 700;
     }
-    
-    /* Undo/Redo button styling */
-    query-builder-component::part(toolbar) .flex.items-center.space-x-1 {
-      display: flex;
-      gap: 0.25rem;
+
+    .demo-header p {
+      margin: 0.5rem 0 0;
+      opacity: 0.9;
+      font-size: 0.95rem;
     }
-    
-    query-builder-component::part(toolbar) button {
-      padding: 0.375rem;
-      border-radius: 0.375rem;
-      transition-colors: all 0.2s ease;
-      color: #4b5563;
+
+    /* Example 1: Default Component Styling */
+    #defaultExample::part(root-container) {
+      padding: 0;
+    }
+
+    #defaultExample::part(main-panel) {
       border: none;
-      background: transparent;
+      box-shadow: none;
+    }
+
+    #defaultExample::part(header-section) {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      padding: 1.5rem;
+      border: none;
+    }
+
+    #defaultExample::part(header-title) {
+      color: white;
+      font-size: 1.25rem;
+    }
+
+    #defaultExample::part(header-description) {
+      color: rgba(255, 255, 255, 0.9);
+      margin-top: 0.25rem;
+    }
+    /* Example 2: Dark Theme Styling */
+    #darkExample::part(root-container) {
+      background: #1f2937;
+      padding: 1rem;
+      border-radius: 12px;
+    }
+
+    #darkExample::part(main-panel) {
+      background: #111827;
+      border: 1px solid #374151;
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+    }
+
+    #darkExample::part(header-section) {
+      background: #1f2937;
+      border-bottom: 1px solid #374151;
+    }
+
+    #darkExample::part(header-title) {
+      color: #f9fafb;
+    }
+
+    #darkExample::part(header-description) {
+      color: #9ca3af;
+    }
+
+    #darkExample::part(toolbar) {
+      background: #1f2937;
+      border: 1px solid #374151;
+      border-radius: 8px;
+    }
+
+    #darkExample::part(toolbar-title) {
+      color: #f3f4f6;
+    }
+
+    #darkExample::part(undo-button),
+    #darkExample::part(redo-button) {
+      color: #9ca3af;
+      transition: all 0.2s;
+    }
+
+    #darkExample::part(undo-button):not([disabled]):hover,
+    #darkExample::part(redo-button):not([disabled]):hover {
+      color: #60a5fa;
+      background: rgba(59, 130, 246, 0.1);
+    }
+
+    #darkExample::part(conditions-container) {
+      background: #1f2937;
+      border-color: #374151;
+    }
+
+    #darkExample::part(conditions-title) {
+      color: #f3f4f6;
+    }
+
+    #darkExample::part(clear-all-button) {
+      background: #7f1d1d;
+      color: #fca5a5;
+    }
+
+    #darkExample::part(clear-all-button):hover {
+      background: #991b1b;
+    }
+
+    #darkExample::part(condition-row) {
+      background: #111827;
+      border: 1px solid #374151;
+    }
+
+    #darkExample::part(condition-group-badge) {
+      background: #1e3a8a;
+      color: #93c5fd;
+    }
+
+    #darkExample::part(condition-field) {
+      color: #60a5fa;
+    }
+
+    #darkExample::part(condition-operator) {
+      color: #34d399;
+    }
+
+    #darkExample::part(condition-value) {
+      color: #c084fc;
+    }
+
+    #darkExample::part(edit-button) {
+      color: #60a5fa;
+    }
+
+    #darkExample::part(delete-button) {
+      color: #f87171;
+    }
+
+    #darkExample::part(add-condition-container) {
+      background: #111827;
+      border: 1px solid #374151;
+    }
+
+    #darkExample::part(add-condition-title) {
+      color: #f3f4f6;
+    }
+
+    #darkExample::part(field-condition-button),
+    #darkExample::part(where-expression-button) {
+      background: #374151;
+      color: #d1d5db;
+    }
+
+    #darkExample::part(field-condition-button)[class*="bg-blue"],
+    #darkExample::part(where-expression-button)[class*="bg-blue"] {
+      background: #2563eb;
+      color: white;
+    }
+
+    #darkExample::part(field-select),
+    #darkExample::part(operator-select),
+    #darkExample::part(value-input),
+    #darkExample::part(where-input) {
+      background: #1f2937;
+      border: 1px solid #374151;
+      color: #f3f4f6;
+    }
+
+    #darkExample::part(add-and-button) {
+      background: #2563eb;
+    }
+
+    #darkExample::part(add-or-button) {
+      background: #dc2626;
+    }
+
+    #darkExample::part(query-output) {
+      background: #030712;
+      border: 1px solid #374151;
+    }
+
+    #darkExample::part(query-output-title) {
+      color: #9ca3af;
+    }
+
+    #darkExample::part(query-output-content) {
+      color: #f3f4f6;
+    }
+    /* Example 3: Material Design Inspired */
+    #materialExample::part(root-container) {
+      font-family: 'Roboto', sans-serif;
+    }
+
+    #materialExample::part(main-panel) {
+      box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);
+      border: none;
+    }
+
+    #materialExample::part(header-section) {
+      background: #6200ea;
+      padding: 1.5rem;
+      border: none;
+    }
+
+    #materialExample::part(header-title) {
+      color: white;
+      font-weight: 500;
+      letter-spacing: 0.5px;
+    }
+
+    #materialExample::part(header-description) {
+      color: rgba(255, 255, 255, 0.87);
+      font-size: 0.875rem;
+    }
+
+    #materialExample::part(toolbar) {
+      background: #f5f5f5;
+      padding: 1rem;
+      border-radius: 4px;
+      margin-bottom: 1rem;
+    }
+
+    #materialExample::part(undo-button),
+    #materialExample::part(redo-button) {
+      border-radius: 50%;
+      width: 36px;
+      height: 36px;
       display: flex;
       align-items: center;
       justify-content: center;
+      transition: background 0.3s;
     }
-    
-    query-builder-component::part(toolbar) button:hover:not(:disabled) {
-      color: #2563eb;
-      background-color: #eff6ff;
+
+    #materialExample::part(undo-button):hover,
+    #materialExample::part(redo-button):hover {
+      background: rgba(98, 0, 234, 0.08);
     }
-    
-    query-builder-component::part(toolbar) button:disabled {
-      color: #9ca3af;
-      cursor: not-allowed;
+
+    #materialExample::part(condition-row) {
+      border-radius: 4px;
+      transition: box-shadow 0.3s;
     }
-    
-    /* Conditions list styling */
-    query-builder-component::part(conditions-list) {
-      background-color: #f9fafb;
-      border: 1px solid #e5e7eb;
-      border-radius: 8px;
-      padding: 1rem;
-      margin: 0 1rem 1rem;
+
+    #materialExample::part(condition-row):hover {
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
-    
-    query-builder-component::part(conditions-list) .mb-3 {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 0.75rem;
-    }
-    
-    query-builder-component::part(conditions-list) .text-sm.font-semibold.text-gray-900 {
-      color: #374151;
-      font-weight: 600;
-      font-size: 0.875rem;
-    }
-    
-    query-builder-component::part(conditions-list) .text-xs {
-      font-size: 0.75rem;
-    }
-    
-    query-builder-component::part(conditions-list) .bg-red-100 {
-      background-color: #fee2e2;
-      color: #b91c1c;
-      padding: 0.25rem 0.5rem;
-      border-radius: 0.375rem;
-      border: none;
-      cursor: pointer;
-      transition: all 0.2s ease;
-    }
-    
-    query-builder-component::part(conditions-list) .bg-red-100:hover {
-      background-color: #fecaca;
-    }
-    
-    /* Condition item styling */
-    query-builder-component::part(condition-item) {
-      background-color: #ffffff;
-      border: 1px solid #e5e7eb;
-      border-radius: 0.375rem;
-      padding: 0.5rem;
-      margin-bottom: 0.5rem;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    
-    query-builder-component::part(condition-item) .flex.items-center.space-x-2 {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-    
-    query-builder-component::part(condition-item) .text-sm {
-      font-size: 0.875rem;
-    }
-    
-    query-builder-component::part(condition-item) .px-2.py-1.text-xs.rounded.font-bold.bg-blue-100.text-blue-800 {
-      background-color: #dbeafe;
-      color: #1e40af;
-      padding: 0.25rem 0.5rem;
-      border-radius: 0.25rem;
-      font-weight: 700;
-      font-size: 0.75rem;
-    }
-    
-    query-builder-component::part(condition-item) .px-2.py-1.text-xs.rounded.font-bold.bg-red-100.text-red-800 {
-      background-color: #fee2e2;
-      color: #991b1b;
-      padding: 0.25rem 0.5rem;
-      border-radius: 0.25rem;
-      font-weight: 700;
-      font-size: 0.75rem;
-    }
-    
-    query-builder-component::part(condition-item) .font-mono.text-blue-600 {
-      color: #2563eb;
-      font-family: monospace;
-    }
-    
-    query-builder-component::part(condition-item) .text-green-600 {
-      color: #059669;
-    }
-    
-    query-builder-component::part(condition-item) .text-purple-600 {
-      color: #7e22ce;
-    }
-    
-    /* Action buttons */
-    query-builder-component::part(condition-item) .flex.items-center.space-x-1 {
-      display: flex;
-      align-items: center;
-      gap: 0.25rem;
-    }
-    
-    query-builder-component::part(condition-item) .text-blue-500 {
-      color: #3b82f6;
-      border: none;
-      background: transparent;
-      padding: 0.25rem;
-      border-radius: 0.25rem;
-      cursor: pointer;
-      transition: all 0.2s ease;
-    }
-    
-    query-builder-component::part(condition-item) .text-blue-500:hover {
-      color: #1d4ed8;
-      background-color: #eff6ff;
-    }
-    
-    query-builder-component::part(condition-item) .text-red-500 {
-      color: #ef4444;
-      border: none;
-      background: transparent;
-      padding: 0.25rem;
-      border-radius: 0.25rem;
-      cursor: pointer;
-      transition: all 0.2s ease;
-    }
-    
-    query-builder-component::part(condition-item) .text-red-500:hover {
-      color: #b91c1c;
-      background-color: #fee2e2;
-    }
-    
-    /* Add form styling */
-    query-builder-component::part(add-form) {
-      background-color: #ffffff;
-      border: 1px solid #e5e7eb;
-      border-radius: 0.5rem;
-      padding: 1rem;
-      margin: 0 1rem 1rem;
-    }
-    
-    query-builder-component::part(add-form) .flex.items-center.justify-between {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 1rem;
-    }
-    
-    query-builder-component::part(add-form) .text-lg.font-semibold.text-gray-900 {
-      color: #111827;
-      font-weight: 600;
-      font-size: 1.125rem;
-    }
-    
-    query-builder-component::part(add-form) .text-gray-500 {
-      color: #6b7280;
-    }
-    
-    query-builder-component::part(add-form) .text-gray-500:hover {
-      color: #374151;
-    }
-    
-    query-builder-component::part(add-form) label {
-      display: block;
-      font-size: 0.875rem;
+
+    #materialExample::part(add-and-button),
+    #materialExample::part(add-or-button) {
+      text-transform: uppercase;
+      letter-spacing: 1px;
       font-weight: 500;
-      color: #374151;
-      margin-bottom: 0.5rem;
+      border-radius: 4px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+      transition: box-shadow 0.3s;
+    }
+
+    #materialExample::part(add-and-button):hover,
+    #materialExample::part(add-or-button):hover {
+      box-shadow: 0 4px 8px rgba(0,0,0,0.3);
     }
     
-    query-builder-component::part(add-form) .flex.space-x-4 {
-      display: flex;
-      gap: 1rem;
-      margin-bottom: 1rem;
+    /* Custom icon styles */
+    .custom-icon {
+      width: 20px;
+      height: 20px;
     }
-    
-    query-builder-component::part(add-form) button {
-      padding: 0.5rem 1rem;
-      border-radius: 0.375rem;
-      font-size: 0.875rem;
-      font-weight: 500;
-      border: 1px solid transparent;
-      cursor: pointer;
-      transition-colors: all 0.2s ease;
+
+    .custom-undo-icon {
+      animation: bounce 1s infinite;
     }
-    
-    query-builder-component::part(add-form) button:first-child {
-      background-color: #2563eb;
-      color: #ffffff;
-    }
-    
-    query-builder-component::part(add-form) button:last-child {
-      background-color: #dcfce7;
-      color: #166534;
-    }
-    
-    query-builder-component::part(add-form) button:last-child:hover {
-      background-color: #bbf7d0;
-    }
-    
-    /* Form inputs */
-    query-builder-component::part(add-form) .css-b62m3t-container {
-      width: 100%;
-    }
-    
-    query-builder-component::part(add-form) .field-selection-dropdown__control,
-    query-builder-component::part(add-form) .operator-selection-dropdown__control {
-      border: 1px solid #d1d5db;
-      border-radius: 0.375rem;
-      padding: 0.25rem 0.5rem;
-      min-height: 2rem;
-      cursor: pointer;
-      background-color: #ffffff;
-    }
-    
-    query-builder-component::part(add-form) input[type="text"] {
-      width: 100%;
-      padding: 0.5rem;
-      border: 1px solid #d1d5db;
-      border-radius: 0.375rem;
-      font-size: 0.875rem;
-      color: #374151;
-    }
-    
-    query-builder-component::part(add-form) input[type="text"]:focus {
-      outline: none;
-      border-color: #3b82f6;
-      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
-    }
-    
-    query-builder-component::part(add-form) .text-xs.text-gray-500 {
-      font-size: 0.75rem;
-      color: #6b7280;
-      margin-top: 0.25rem;
-    }
-    
-    /* Query preview styling */
-    query-builder-component::part(query-preview) {
-      background-color: #111827;
-      border-radius: 0.5rem;
-      padding: 1rem;
-      margin: 0 1rem 1rem;
-    }
-    
-    query-builder-component::part(query-preview) p {
-      color: #f9fafb;
-      font-weight: 600;
-      font-size: 0.875rem;
-      margin: 0 0 0.5rem 0;
-    }
-    
-    query-builder-component::part(query-preview) pre {
-      color: #f3f4f6;
-      white-space: pre-wrap;
-      word-break: break-all;
-      font-size: 0.875rem;
-      overflow-x: auto;
-      margin: 0;
+
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-2px); }
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h2 class="text-xl font-bold mb-4">Default Query Builder</h2>
-    <query-builder-component id="queryBuilder">
-      <!-- Default toolbar will be used as per component's internal structure -->
-    </query-builder-component>
+  <!-- Loading indicator for WASM -->
+  <div id="wasmLoader" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div class="bg-white rounded-lg p-6 shadow-xl">
+      <div class="flex items-center space-x-3">
+        <svg class="animate-spin h-8 w-8 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+        <div>
+          <p class="text-lg font-semibold">Loading WASM Module...</p>
+          <p class="text-sm text-gray-600">Initializing query validation engine</p>
+        </div>
+      </div>
+    </div>
   </div>
+  <div class="demo-container">
+    <!-- Hero Section -->
+    <div class="text-center py-8 text-white">
+      <h1 class="text-4xl font-bold mb-2">Query Builder Component</h1>
+      <p class="text-xl opacity-90">Fully Customizable with CSS Parts and Slots</p>
+    </div>
 
-  <div class="container mt-8">
-    <h2 class="text-xl font-bold mb-4">Customized Query Builder with Slots and Render Function</h2>
-    <query-builder-component id="customQueryBuilder">
-      <!-- Custom toolbar using slots -->
-      <div slot="toolbar">
-        <div class="flex items-center justify-between bg-blue-50 border border-blue-200 rounded-lg p-3" part="toolbar">
-          <div class="flex items-center space-x-2">
-            <h3 class="text-sm font-semibold text-blue-900">Custom Query Builder</h3>
-            <div class="flex items-center space-x-1">
-              <!-- Custom undo button -->
-              <slot name="undo-button">
-                <button class="p-1.5 rounded transition-colors text-blue-600 hover:text-blue-800 hover:bg-blue-100">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-undo2 lucide-undo-2 w-4 h-4" aria-hidden="true">
-                    <path d="M9 14 4 9l5-5"></path>
-                    <path d="M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5a5.5 5.5 0 0 1-5.5 5.5H11"></path>
-                  </svg>
-                </button>
-              </slot>
-              <!-- Custom redo button -->
-              <slot name="redo-button">
-                <button class="p-1.5 rounded transition-colors text-blue-600 hover:text-blue-800 hover:bg-blue-100">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-redo2 lucide-redo-2 w-4 h-4" aria-hidden="true">
-                    <path d="m15 14 5-5-5-5"></path>
-                    <path d="M20 9H9.5A5.5 5.5 0 0 0 4 14.5A5.5 5.5 0 0 0 9.5 20H13"></path>
-                  </svg>
-                </button>
-              </slot>
-            </div>
+    <!-- Example 1: Default with Beautiful Theme -->
+    <div class="demo-section">
+      <div class="demo-header">
+        <h2>Default Component with Custom Theme</h2>
+        <p>Using CSS parts to apply a beautiful gradient theme</p>
+      </div>
+      <query-builder-component id="defaultExample"></query-builder-component>
+    </div>
+
+    <!-- Example 2: Dark Theme -->
+    <div class="demo-section">
+      <div class="demo-header" style="background: linear-gradient(90deg, #1f2937 0%, #374151 100%);">
+        <h2>Dark Theme</h2>
+        <p>Complete dark mode styling using CSS parts</p>
+      </div>
+      <query-builder-component id="darkExample"></query-builder-component>
+    </div>
+
+    <!-- Example 3: Material Design -->
+    <div class="demo-section">
+      <div class="demo-header" style="background: linear-gradient(90deg, #6200ea 0%, #3700b3 100%);">
+        <h2>Material Design Style</h2>
+        <p>Material Design inspired theming</p>
+      </div>
+      <query-builder-component id="materialExample"></query-builder-component>
+    </div>
+
+    <!-- Example 4: Custom Content with Slots -->
+    <div class="demo-section">
+      <div class="demo-header" style="background: linear-gradient(90deg, #10b981 0%, #059669 100%);">
+        <h2>Custom Content & Icons</h2>
+        <p>Using slots to replace text and icons</p>
+      </div>
+      <query-builder-component id="customSlotExample">
+        <!-- Custom Header -->
+        <div slot="header" class="p-4 bg-gradient-to-r from-emerald-500 to-teal-600 text-white">
+          <h2 class="text-2xl font-bold flex items-center gap-2">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+            </svg>
+            Advanced Query Builder
+          </h2>
+          <p class="text-emerald-100 mt-1">Create complex MongoDB queries with ease</p>
+        </div>
+
+        <!-- Custom Icons -->
+        <svg slot="undo-icon" class="custom-icon custom-undo-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"></path>
+        </svg>
+        
+        <svg slot="redo-icon" class="custom-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 10h-10a8 8 0 00-8 8v2M21 10l-6 6m6-6l-6-6"></path>
+        </svg>
+
+        <svg slot="edit-icon" class="custom-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+        </svg>
+
+        <svg slot="delete-icon" class="custom-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+        </svg>
+
+        <!-- Custom Text -->
+        <span slot="add-condition-title">➕ New Query Condition</span>
+        <span slot="clear-all-text">🗑️ Clear</span>
+        <span slot="field-condition-text">📊 Field Based</span>
+        <span slot="where-expression-text">🔧 Custom Expression</span>
+        <span slot="add-and-text">✓ ADD WITH AND</span>
+        <span slot="add-or-text">✓ ADD WITH OR</span>
+        <span slot="query-output-title">📝 Generated MongoDB Query:</span>
+      </query-builder-component>
+    </div>
+
+    <!-- Example 5: Query Validation with sift-rs-wasm -->
+    <div class="demo-section">
+      <div class="demo-header" style="background: linear-gradient(90deg, #ef4444 0%, #dc2626 100%);">
+        <h2>Query Validation with WASM</h2>
+        <p>Real-time MongoDB query validation using sift-rs-wasm</p>
+      </div>
+      <div class="p-6">
+        <query-builder-component id="validatedExample"></query-builder-component>
+        
+        <!-- Validation Results Panel -->
+        <div class="mt-4 p-4 bg-gray-50 rounded-lg">
+          <h3 class="text-lg font-semibold mb-3 flex items-center gap-2">
+            <span id="validationIcon" class="text-2xl">⏸️</span>
+            Query Validation Status
+          </h3>
+          <div id="validationStatus" class="mb-3">
+            <span class="px-3 py-1 rounded-full text-sm font-medium bg-gray-200 text-gray-700">
+              No query to validate
+            </span>
           </div>
-          <!-- Add custom elements to the toolbar -->
-          <div class="flex items-center space-x-2">
-            <button class="px-3 py-1 text-xs bg-blue-100 text-blue-800 rounded-full hover:bg-blue-200">Help</button>
-            <button class="px-3 py-1 text-xs bg-purple-100 text-purple-800 rounded-full hover:bg-purple-200">Save</button>
+          <div id="validationDetails" class="hidden">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+              <div class="bg-white p-3 rounded border">
+                <h4 class="text-sm font-semibold text-gray-600 mb-1">Query Structure</h4>
+                <pre id="queryStructure" class="text-xs text-gray-800 font-mono overflow-x-auto"></pre>
+              </div>
+              <div class="bg-white p-3 rounded border">
+                <h4 class="text-sm font-semibold text-gray-600 mb-1">Test Results</h4>
+                <div id="testResults" class="space-y-2"></div>
+              </div>
+            </div>
+            <div class="bg-white p-3 rounded border">
+              <h4 class="text-sm font-semibold text-gray-600 mb-2">Live Testing</h4>
+              <div class="flex gap-2">
+                <input 
+                  id="testDataInput" 
+                  type="text" 
+                  class="flex-1 px-3 py-2 border rounded-md text-sm font-mono"
+                  placeholder='Enter test data JSON, e.g., {"age": 30, "department": "Engineering"}'
+                />
+                <button 
+                  id="testQueryBtn"
+                  class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors text-sm font-medium"
+                >
+                  Test Query
+                </button>
+              </div>
+              <div id="testResult" class="mt-2"></div>
+            </div>
           </div>
         </div>
       </div>
-    </query-builder-component>
+    </div>
+
+    <!-- Feature Highlights -->
+    <div class="bg-white rounded-xl shadow-lg p-8 mt-8">
+      <h2 class="text-2xl font-bold text-gray-800 mb-6">🎨 Features Overview</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="border-l-4 border-blue-500 pl-4">
+          <h3 class="font-semibold text-gray-700 mb-2">CSS Parts (60+)</h3>
+          <p class="text-gray-600 text-sm">Style every visual aspect of the component without modifying source code. From containers to buttons, everything is customizable.</p>
+        </div>
+        <div class="border-l-4 border-green-500 pl-4">
+          <h3 class="font-semibold text-gray-700 mb-2">Slots (15+)</h3>
+          <p class="text-gray-600 text-sm">Replace icons, text, and entire sections with your own content. Perfect for localization and branding.</p>
+        </div>
+        <div class="border-l-4 border-purple-500 pl-4">
+          <h3 class="font-semibold text-gray-700 mb-2">Theme Support</h3>
+          <p class="text-gray-600 text-sm">Create multiple themes by switching stylesheets. Dark mode, Material Design, or your own custom theme.</p>
+        </div>
+        <div class="border-l-4 border-orange-500 pl-4">
+          <h3 class="font-semibold text-gray-700 mb-2">Shadow DOM</h3>
+          <p class="text-gray-600 text-sm">Encapsulated styles prevent conflicts while maintaining full customization through standard web APIs.</p>
+        </div>
+        <div class="border-l-4 border-red-500 pl-4">
+          <h3 class="font-semibold text-gray-700 mb-2">WASM Validation</h3>
+          <p class="text-gray-600 text-sm">Real-time query validation using sift-rs-wasm ensures your MongoDB queries are syntactically correct.</p>
+        </div>
+      </div>
+    </div>
   </div>
 
-  <script>
-    // Initialize the default query builder
-    const queryBuilder = document.getElementById('queryBuilder');
+  <script type="module">
+    // Import sift-rs-wasm from the served location
+    // Stencil copies the files to /sift-rs-wasm/pkg/ during build
+    import init, { validate_query, sift, create_filter_fn } from '/sift-rs-wasm/pkg/sift_rs_wasm.js';
     
-    // Set the JSON object input for default builder
-    const data = [
+    let wasmModule = null;
+    let filterFunction = null;
+    
+    // Initialize WASM module
+    async function initializeWasm() {
+      try {
+        // Load WASM from the served location
+        const wasmPath = '/sift-rs-wasm/pkg/sift_rs_wasm_bg.wasm';
+        console.log('Loading WASM module from:', wasmPath);
+        
+        // Initialize the WASM module
+        // The init function will fetch the WASM file from the served path
+        await init(wasmPath);
+        
+        // Store the exported functions
+        wasmModule = { validate_query, sift, create_filter_fn };
+        console.log('✅ WASM module loaded successfully from disk');
+        
+        // Hide loader
+        document.getElementById('wasmLoader').style.display = 'none';
+        
+        // Initialize validation example
+        setupValidationExample();
+      } catch (error) {
+        console.error('Failed to load WASM module from disk:', error);
+        
+        // Provide more detailed error information
+        let errorMessage = error.message;
+        if (error.message.includes('fetch')) {
+          errorMessage = 'Failed to fetch WASM file. Make sure the path is correct and the server is running.';
+        } else if (error.message.includes('instantiate')) {
+          errorMessage = 'Failed to instantiate WASM module. The file might be corrupted.';
+        }
+        
+        document.getElementById('wasmLoader').innerHTML = `
+          <div class="bg-red-50 rounded-lg p-6 shadow-xl max-w-md">
+            <div class="flex items-start gap-3">
+              <svg class="w-6 h-6 text-red-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+              <div class="flex-1">
+                <p class="text-red-600 font-semibold">Failed to load WASM module</p>
+                <p class="text-sm text-red-500 mt-1">${errorMessage}</p>
+                <div class="mt-3 text-xs text-gray-600">
+                  <p>Expected path: <code class="bg-gray-100 px-1 py-0.5 rounded">/sift-rs-wasm/pkg/sift_rs_wasm_bg.wasm</code>
+                  <p class="mt-1">Make sure:</p>
+                  <ul class="list-disc list-inside mt-1 space-y-0.5">
+                    <li>The sift-rs-wasm module has been built with <code class="bg-gray-100 px-1 py-0.5 rounded">wasm-pack build --target web</code></li>
+                    <li>The WASM files exist at <code class="bg-gray-100 px-1 py-0.5 rounded">../sift-rs-wasm/pkg/</code></li>
+                    <li>The development server is running with <code class="bg-gray-100 px-1 py-0.5 rounded">npm start</code></li>
+                    <li>Stencil has copied the files to the www directory</li>
+                  </ul>
+                </div>
+                <button onclick="location.reload()" class="mt-4 px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 text-sm">
+                  Retry Loading
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+    }
+    
+    // Call initialization
+    initializeWasm();
+    
+    // Sample data for all examples
+    const sampleData = [
       {
         "name": "John Doe",
         "age": 30,
         "email": "john.doe@example.com",
         "isVerified": true,
+        "department": "Engineering",
+        "salary": 95000,
+        "startDate": "2020-01-15",
         "address": {
-          "city": "New York",
-          "zip": "10001",
-          "country": "USA"
+          "city": "San Francisco",
+          "state": "CA",
+          "country": "USA",
+          "zipCode": "94105"
         },
-        "tags": ["customer", "vip"]
+        "skills": ["JavaScript", "TypeScript", "React", "Node.js"],
+        "projects": [
+          {
+            "name": "Project Alpha",
+            "status": "completed",
+            "budget": 50000
+          },
+          {
+            "name": "Project Beta",
+            "status": "in-progress",
+            "budget": 75000
+          }
+        ],
+        "metadata": {
+          "lastLogin": "2024-01-20T10:30:00Z",
+          "accountType": "premium",
+          "preferences": {
+            "theme": "dark",
+            "notifications": true
+          }
+        }
       }
     ];
-    queryBuilder.jsonInput = data;
 
-    // Set localization for default builder
-    queryBuilder.localization = {
-      addForm: {
-        title: 'Add New Condition'
-      },
-      operators: {
-        '$eq': 'is equal to',
-        '$ne': 'is not equal to',
-        '$gt': 'is greater than',
-        '$gte': 'is greater than or equal to',
-        '$lt': 'is less than',
-        '$lte': 'is less than or equal to',
-        '$in': 'is in array',
-        '$nin': 'is not in array',
-        '$exists': 'exists',
-        '$regex': 'matches regex',
-        '$size': 'array size',
-        '$type': 'BSON type'
-      }
-    };
-
-    queryBuilder.addEventListener('queryChanged', event => {
-      console.log('Default Query Changed:', event.detail);
-    });
-
-    queryBuilder.addEventListener('historyUpdated', event => {
-      // The undo/redo buttons will be handled by the component's internal logic
-      const undoButton = document.querySelector('#queryBuilder [data-testid="undo-button"]');
-      const redoButton = document.querySelector('#queryBuilder [data-testid="redo-button"]');
-      
-      if (undoButton) {
-        if (event.detail.canUndo) {
-          undoButton.classList.remove('text-gray-400', 'cursor-not-allowed');
-          undoButton.classList.add('text-gray-600', 'hover:text-blue-600', 'hover:bg-blue-50');
-        } else {
-          undoButton.classList.add('text-gray-400', 'cursor-not-allowed');
-          undoButton.classList.remove('text-gray-600', 'hover:text-blue-600', 'hover:bg-blue-50');
-        }
-      }
-      
-      if (redoButton) {
-        if (event.detail.canRedo) {
-          redoButton.classList.remove('text-gray-400', 'cursor-not-allowed');
-          redoButton.classList.add('text-gray-600', 'hover:text-blue-600', 'hover:bg-blue-50');
-        } else {
-          redoButton.classList.add('text-gray-400', 'cursor-not-allowed');
-          redoButton.classList.remove('text-gray-600', 'hover:text-blue-600', 'hover:bg-blue-50');
-        }
-      }
-    });
-
-    // Initialize the customized query builder
-    const customQueryBuilder = document.getElementById('customQueryBuilder');
-    
-    // Set the JSON object input for custom builder
-    customQueryBuilder.jsonInput = data;
-
-    // Set localization for custom builder
-    customQueryBuilder.localization = {
-      addForm: {
-        title: 'Add New Custom Condition'
-      },
+    // Initialize Example 1: Default with theme
+    const defaultExample = document.getElementById('defaultExample');
+    defaultExample.jsonInput = sampleData;
+    // Initialize Example 2: Dark theme
+    const darkExample = document.getElementById('darkExample');
+    darkExample.jsonInput = sampleData;
+    // Initialize Example 3: Material Design
+    const materialExample = document.getElementById('materialExample');
+    materialExample.jsonInput = sampleData;
+    // Initialize Example 4: Custom slots
+    const customSlotExample = document.getElementById('customSlotExample');
+    customSlotExample.jsonInput = sampleData;
+    // Common localization for all examples
+    const commonLocalization = {
       operators: {
         '$eq': 'equals',
         '$ne': 'not equals',
         '$gt': 'greater than',
-        '$gte': 'greater than equal',
+        '$gte': 'greater or equal',
         '$lt': 'less than',
-        '$lte': 'less than equal',
+        '$lte': 'less or equal',
         '$in': 'in array',
         '$nin': 'not in array',
         '$exists': 'exists',
-        '$regex': 'regex',
+        '$regex': 'matches pattern',
         '$size': 'array size',
-        '$type': 'type'
+        '$type': 'type is'
       }
     };
-
-    // Add custom rendering function to customize condition display
-    customQueryBuilder.renderCondition = (condition) => {
-      if (condition.type === 'field') {
-        return `
-          <div class="flex items-center space-x-2 text-sm">
-            <span class="px-2 py-1 text-xs rounded font-bold bg-green-100 text-green-800">${condition.group.toUpperCase()}</span>
-            <span class="font-mono text-blue-600">${condition.field}</span>
-            <span class="text-yellow-600">${condition.operator}</span>
-            <span class="text-purple-600">${typeof condition.value === 'string' ? `"${condition.value}"` : JSON.stringify(condition.value)}</span>
+    // Apply localization to all examples
+    defaultExample.localization = commonLocalization;
+    darkExample.localization = commonLocalization;
+    materialExample.localization = commonLocalization;
+    customSlotExample.localization = commonLocalization;
+    // Add event listeners to show the queries being generated
+    function setupQueryListener(elementId, label) {
+      const element = document.getElementById(elementId);
+      element.addEventListener('queryChanged', event => {
+        console.log(`[${label}] Query:`, event.detail);
+      });
+      
+      element.addEventListener('historyUpdated', event => {
+        console.log(`[${label}] History:`, event.detail);
+      });
+    }
+    setupQueryListener('defaultExample', 'Default');
+    setupQueryListener('darkExample', 'Dark');
+    setupQueryListener('materialExample', 'Material');
+    setupQueryListener('customSlotExample', 'Custom Slots');
+    
+    // Setup validation example
+    function setupValidationExample() {
+      const validatedExample = document.getElementById('validatedExample');
+      validatedExample.jsonInput = sampleData;
+      validatedExample.localization = commonLocalization;
+      
+      // Update validation status on query change
+      validatedExample.addEventListener('queryChanged', (event) => {
+        const query = event.detail;
+        validateAndDisplayQuery(query);
+      });
+    }
+    
+    // Validate and display query results
+    function validateAndDisplayQuery(queryString) {
+      if (!wasmModule) {
+        console.warn('WASM module not loaded yet');
+        return;
+      }
+      
+      const validationIcon = document.getElementById('validationIcon');
+      const validationStatus = document.getElementById('validationStatus');
+      const validationDetails = document.getElementById('validationDetails');
+      const queryStructure = document.getElementById('queryStructure');
+      const testResults = document.getElementById('testResults');
+      
+      try {
+        // Parse the query to check if it's valid JSON
+        const queryObj = JSON.parse(queryString);
+        
+        // Validate using WASM
+        const isValid = wasmModule.validate_query(queryString);
+        
+        if (isValid) {
+          validationIcon.textContent = '✅';
+          validationStatus.innerHTML = `
+            <span class="px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-700">
+              Valid MongoDB Query
+            </span>
+            <span class="ml-2 text-sm text-gray-600">
+              Query structure is correct and ready to use
+            </span>
+          `;
+          
+          // Show query structure
+          queryStructure.textContent = JSON.stringify(queryObj, null, 2);
+          
+          // Test against sample data
+          testAgainstSampleData(queryString);
+          
+          validationDetails.classList.remove('hidden');
+        } else {
+          validationIcon.textContent = '⚠️';
+          validationStatus.innerHTML = `
+            <span class="px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-700">
+              Invalid Query Structure
+            </span>
+            <span class="ml-2 text-sm text-gray-600">
+              The query contains invalid MongoDB operators or structure
+            </span>
+          `;
+          validationDetails.classList.add('hidden');
+        }
+      } catch (error) {
+        validationIcon.textContent = '❌';
+        validationStatus.innerHTML = `
+          <span class="px-3 py-1 rounded-full text-sm font-medium bg-red-100 text-red-700">
+            Invalid JSON
+          </span>
+          <span class="ml-2 text-sm text-gray-600">
+            ${error.message}
+          </span>
+        `;
+        validationDetails.classList.add('hidden');
+      }
+    }
+    
+    // Test query against sample data
+    function testAgainstSampleData(queryString) {
+      const testResults = document.getElementById('testResults');
+      testResults.innerHTML = '';
+      
+      // Test against each sample data item
+      sampleData.forEach((item, index) => {
+        try {
+          const matches = wasmModule.sift(queryString, JSON.stringify(item));
+          const resultDiv = document.createElement('div');
+          resultDiv.className = `flex items-center justify-between p-2 rounded ${
+            matches ? 'bg-green-50 border border-green-200' : 'bg-gray-50 border border-gray-200'
+          }`;
+          resultDiv.innerHTML = `
+            <span class="text-sm font-medium">
+              ${item.name || `Item ${index + 1}`}
+            </span>
+            <span class="px-2 py-1 rounded text-xs font-medium ${
+              matches ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'
+            }">
+              ${matches ? 'MATCH' : 'NO MATCH'}
+            </span>
+          `;
+          testResults.appendChild(resultDiv);
+        } catch (error) {
+          console.error('Error testing item:', error);
+        }
+      });
+    }
+    
+    // Setup live testing
+    document.getElementById('testQueryBtn')?.addEventListener('click', () => {
+      const validatedExample = document.getElementById('validatedExample');
+      const testDataInput = document.getElementById('testDataInput');
+      const testResult = document.getElementById('testResult');
+      const currentQuery = validatedExample.value;
+      
+      if (!wasmModule) {
+        testResult.innerHTML = `
+          <div class="p-2 bg-red-50 border border-red-200 rounded text-sm text-red-600">
+            WASM module not loaded
           </div>
         `;
-      } else {
-        return `
-          <div class="flex items-center space-x-2 text-sm">
-            <span class="px-2 py-1 text-xs rounded font-bold bg-red-100 text-red-800">TOP-LEVEL</span>
-            <span class="font-mono text-red-600">$where</span>
-            <span class="text-purple-600">${condition.expression}</span>
+        return;
+      }
+      
+      try {
+        const testData = testDataInput.value.trim();
+        if (!testData) {
+          testResult.innerHTML = `
+            <div class="p-2 bg-yellow-50 border border-yellow-200 rounded text-sm text-yellow-600">
+              Please enter test data
+            </div>
+          `;
+          return;
+        }
+        
+        // Validate JSON
+        JSON.parse(testData);
+        JSON.parse(currentQuery);
+        
+        // Test the query
+        const matches = wasmModule.sift(currentQuery, testData);
+        
+        testResult.innerHTML = `
+          <div class="p-3 rounded border ${
+            matches 
+              ? 'bg-green-50 border-green-300' 
+              : 'bg-red-50 border-red-300'
+          }">
+            <div class="flex items-center gap-2">
+              <span class="text-2xl">${matches ? '✅' : '❌'}</span>
+              <div>
+                <p class="font-semibold ${
+                  matches ? 'text-green-700' : 'text-red-700'
+                }">
+                  ${matches ? 'Query Matches!' : 'Query Does Not Match'}
+                </p>
+                <p class="text-sm text-gray-600 mt-1">
+                  The provided data ${matches ? 'satisfies' : 'does not satisfy'} the query conditions
+                </p>
+              </div>
+            </div>
+          </div>
+        `;
+      } catch (error) {
+        testResult.innerHTML = `
+          <div class="p-2 bg-red-50 border border-red-200 rounded text-sm text-red-600">
+            Error: ${error.message}
           </div>
         `;
       }
-    };
-
-    customQueryBuilder.addEventListener('queryChanged', event => {
-      console.log('Custom Query Changed:', event.detail);
     });
+    
+    // Add example test data buttons
+    const testDataInput = document.getElementById('testDataInput');
+    if (testDataInput) {
+      const exampleButtons = document.createElement('div');
+      exampleButtons.className = 'mt-2 flex gap-2 flex-wrap';
+      exampleButtons.innerHTML = `
+        <button class="px-3 py-1 text-xs bg-gray-100 hover:bg-gray-200 rounded" onclick="document.getElementById('testDataInput').value = JSON.stringify({age: 35, department: 'Engineering', isVerified: true})">
+          Engineering Employee
+        </button>
+        <button class="px-3 py-1 text-xs bg-gray-100 hover:bg-gray-200 rounded" onclick="document.getElementById('testDataInput').value = JSON.stringify({age: 22, department: 'Marketing', isVerified: false})">
+          Marketing Intern
+        </button>
+        <button class="px-3 py-1 text-xs bg-gray-100 hover:bg-gray-200 rounded" onclick="document.getElementById('testDataInput').value = JSON.stringify({salary: 120000, skills: ['React', 'Node.js']})">
+          Senior Developer
+        </button>
+      `;
+      testDataInput.parentElement.appendChild(exampleButtons);
+    }
+    // Set some initial queries for demonstration
+    setTimeout(() => {
+      // Example query for the dark theme version
+      darkExample.value = JSON.stringify({
+        "$and": [
+          { "age": { "$gte": 25 } },
+          { "department": { "$eq": "Engineering" } },
+          { "isVerified": { "$eq": true } }
+        ]
+      }, null, 2);
 
-    customQueryBuilder.addEventListener('historyUpdated', event => {
-      console.log('Custom History Updated:', event.detail);
-    });
+      // Example query for material design
+      materialExample.value = JSON.stringify({
+        "$or": [
+          { "skills": { "$in": ["React", "Vue", "Angular"] } },
+          { "salary": { "$gt": 100000 } }
+        ]
+      }, null, 2);
+      
+      // Set initial query for validation example
+      const validatedExample = document.getElementById('validatedExample');
+      if (validatedExample && wasmModule) {
+        validatedExample.value = JSON.stringify({
+          "$and": [
+            { "age": { "$gte": 30 } },
+            { "isVerified": { "$eq": true } }
+          ]
+        }, null, 2);
+      }
+    }, 1500);
   </script>
 </body>
 </html>

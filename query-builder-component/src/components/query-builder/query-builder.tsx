@@ -319,111 +319,127 @@ export class QueryBuilder {
 
   render() {
     return (
-      <div class="space-y-4">
-        <div class="bg-white rounded-lg shadow-sm border">
-          <div class="px-4 py-3 border-b bg-gray-50">
-            <h2 class="text-lg font-semibold text-gray-900">MongoDB Query Builder</h2>
-            <p class="text-sm text-gray-600">Build your query using available fields</p>
+      <div class="space-y-4" part="root-container">
+        <div class="bg-white rounded-lg shadow-sm border" part="main-panel">
+          <div class="px-4 py-3 border-b bg-gray-50" part="header-section">
+            <slot name="header">
+              <h2 class="text-lg font-semibold text-gray-900" part="header-title">MongoDB Query Builder</h2>
+              <p class="text-sm text-gray-600" part="header-description">Build your query using available fields</p>
+            </slot>
           </div>
-          <div class="p-4">
-            <div class="space-y-4" data-testid="query-builder">
-              <div class="flex items-center justify-between bg-white border border-gray-200 rounded-lg p-3">
-                <div class="flex items-center space-x-2">
-                  <h3 class="text-sm font-semibold text-gray-900">Query Builder</h3>
-                  <div class="flex items-center space-x-1">
+          <div class="p-4" part="content-wrapper">
+            <div class="space-y-4" data-testid="query-builder" part="query-builder-container">
+              <div class="flex items-center justify-between bg-white border border-gray-200 rounded-lg p-3" part="toolbar">
+                <div class="flex items-center space-x-2" part="toolbar-left">
+                  <h3 class="text-sm font-semibold text-gray-900" part="toolbar-title">Query Builder</h3>
+                  <div class="flex items-center space-x-1" part="history-controls">
                     <button 
                       data-testid="undo-button" 
                       class="p-1.5 rounded transition-colors text-gray-600 hover:text-blue-600 hover:bg-blue-50" 
+                      part="undo-button"
                       title="Undo (Ctrl+Z)"
                       onClick={() => this.undo()}
                       disabled={this.historyIndex <= 0}
                     >
-                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-undo2 lucide-undo-2 w-4 h-4" aria-hidden="true">
-                        <path d="M9 14 4 9l5-5"></path>
-                        <path d="M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5a5.5 5.5 0 0 1-5.5 5.5H11"></path>
-                      </svg>
+                      <slot name="undo-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-undo2 lucide-undo-2 w-4 h-4" aria-hidden="true" part="undo-icon-svg">
+                          <path d="M9 14 4 9l5-5"></path>
+                          <path d="M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5a5.5 5.5 0 0 1-5.5 5.5H11"></path>
+                        </svg>
+                      </slot>
                     </button>
                     <button 
                       data-testid="redo-button" 
                       class="p-1.5 rounded transition-colors text-gray-400 cursor-not-allowed" 
+                      part="redo-button"
                       title="Redo (Ctrl+Y)"
                       onClick={() => this.redo()}
                       disabled={this.historyIndex >= this.queryHistory.length - 1}
                     >
-                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-redo2 lucide-redo-2 w-4 h-4" aria-hidden="true">
-                        <path d="m15 14 5-5-5-5"></path>
-                        <path d="M20 9H9.5A5.5 5.5 0 0 0 4 14.5A5.5 5.5 0 0 0 9.5 20H13"></path>
-                      </svg>
+                      <slot name="redo-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-redo2 lucide-redo-2 w-4 h-4" aria-hidden="true" part="redo-icon-svg">
+                          <path d="m15 14 5-5-5-5"></path>
+                          <path d="M20 9H9.5A5.5 5.5 0 0 0 4 14.5A5.5 5.5 0 0 0 9.5 20H13"></path>
+                        </svg>
+                      </slot>
                     </button>
                   </div>
                 </div>
               </div>
 
               {this.conditions.length > 0 && (
-                <div class="bg-gray-50 border border-gray-200 rounded-md p-3">
-                  <div class="flex justify-between items-center mb-3">
-                    <p class="text-sm font-semibold text-gray-900">Current Conditions:</p>
+                <div class="bg-gray-50 border border-gray-200 rounded-md p-3" part="conditions-container">
+                  <div class="flex justify-between items-center mb-3" part="conditions-header">
+                    <p class="text-sm font-semibold text-gray-900" part="conditions-title">Current Conditions:</p>
                     <button 
                       class="text-xs bg-red-100 text-red-700 px-2 py-1 rounded hover:bg-red-200 transition-colors" 
+                      part="clear-all-button"
                       onClick={() => this.clearAllConditions()}
                     >
-                      Clear All
+                      <slot name="clear-all-text">Clear All</slot>
                     </button>
                   </div>
-                  <div class="space-y-2">
+                  <div class="space-y-2" part="conditions-list">
                     {this.conditions.map(c => {
                       return (
                         <div 
                           key={c.id} 
                           data-testid={`condition-row-${c.type === 'field' ? `${c.field}-${c.operator}` : c.type}-${c.id.split('-').pop() || c.id}`} 
                           class="flex items-center justify-between bg-white border rounded p-2"
+                          part="condition-row"
                         >
-                          <div class="flex items-center space-x-2 text-sm">
+                          <div class="flex items-center space-x-2 text-sm" part="condition-content">
                             {c.type === 'field' && (
-                              <span class={`px-2 py-1 text-xs rounded font-bold bg-blue-100 text-blue-800`}>
+                              <span class={`px-2 py-1 text-xs rounded font-bold bg-blue-100 text-blue-800`} part="condition-group-badge">
                                 {c.group.toUpperCase()}
                               </span>
                             )}
                             {c.type === 'where' && (
-                              <span class="px-2 py-1 text-xs rounded font-bold bg-red-100 text-red-800">
+                              <span class="px-2 py-1 text-xs rounded font-bold bg-red-100 text-red-800" part="condition-where-badge">
                                 TOP-LEVEL
                               </span>
                             )}
-                            <span class="font-mono text-blue-600">
+                            <span class="font-mono text-blue-600" part="condition-field">
                               {c.type === 'field' ? c.field : '$where'}
                             </span>
                             {c.type === 'field' && (
-                              <span class="text-green-600">{c.operator}</span>
+                              <span class="text-green-600" part="condition-operator">{c.operator}</span>
                             )}
-                            <span class="text-purple-600">
+                            <span class="text-purple-600" part="condition-value">
                               {c.type === 'field' ? this.formatValueDisplay(c.value) : c.expression}
                             </span>
                           </div>
-                          <div class="flex items-center space-x-1">
+                          <div class="flex items-center space-x-1" part="condition-actions">
                             <button 
                               data-testid={`edit-condition-${c.type === 'field' ? `${c.field}-${c.operator}` : c.type}-${c.id.split('-').pop() || c.id}`} 
                               class="text-blue-500 hover:text-blue-700 transition-colors" 
+                              part="edit-button"
                               title="Edit condition"
                               onClick={() => this.startEditCondition(c)}
                             >
-                              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-pen-line w-4 h-4" aria-hidden="true">
-                                <path d="M13 21h8"></path>
-                                <path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"></path>
-                              </svg>
+                              <slot name="edit-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-pen-line w-4 h-4" aria-hidden="true" part="edit-icon-svg">
+                                  <path d="M13 21h8"></path>
+                                  <path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"></path>
+                                </svg>
+                              </slot>
                             </button>
                             <button 
                               data-testid={`delete-condition-${c.type === 'field' ? `${c.field}-${c.operator}` : c.type}-${c.id.split('-').pop() || c.id}`} 
                               class="text-red-500 hover:text-red-700 transition-colors" 
+                              part="delete-button"
                               title="Delete condition"
                               onClick={() => this.removeCondition(c.id)}
                             >
-                              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trash2 lucide-trash-2 w-4 h-4" aria-hidden="true">
-                                <path d="M10 11v6"></path>
-                                <path d="M14 11v6"></path>
-                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path>
-                                <path d="M3 6h18"></path>
-                                <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                              </svg>
+                              <slot name="delete-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trash2 lucide-trash-2 w-4 h-4" aria-hidden="true" part="delete-icon-svg">
+                                  <path d="M10 11v6"></path>
+                                  <path d="M14 11v6"></path>
+                                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path>
+                                  <path d="M3 6h18"></path>
+                                  <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                                </svg>
+                              </slot>
                             </button>
                           </div>
                         </div>
@@ -433,45 +449,56 @@ export class QueryBuilder {
                 </div>
               )}
 
-              <div class="bg-white border border-gray-200 rounded-lg p-4 space-y-4">
-                <div class="flex items-center justify-between">
-                  <h3 class="text-lg font-semibold text-gray-900">Add New Condition</h3>
+              <div class="bg-white border border-gray-200 rounded-lg p-4 space-y-4" part="add-condition-container">
+                <div class="flex items-center justify-between" part="add-condition-header">
+                  <h3 class="text-lg font-semibold text-gray-900" part="add-condition-title">
+                    <slot name="add-condition-title">Add New Condition</slot>
+                  </h3>
                   <button 
-                    title="Add New Condition" 
+                    title="Close" 
                     class="text-gray-500 hover:text-gray-700"
+                    part="close-add-button"
                     onClick={() => this.resetAddForm()}
                   >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x w-5 h-5" aria-hidden="true">
-                      <path d="M18 6 6 18"></path>
-                      <path d="m6 6 12 12"></path>
-                    </svg>
+                    <slot name="close-icon">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x w-5 h-5" aria-hidden="true" part="close-icon-svg">
+                        <path d="M18 6 6 18"></path>
+                        <path d="m6 6 12 12"></path>
+                      </svg>
+                    </slot>
                   </button>
                 </div>
                 
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-2">Select Condition Type:</label>
-                  <div class="flex space-x-4">
+                <div part="condition-type-selector">
+                  <label class="block text-sm font-medium text-gray-700 mb-2" part="condition-type-label">
+                    <slot name="condition-type-label">Select Condition Type:</slot>
+                  </label>
+                  <div class="flex space-x-4" part="condition-type-buttons">
                     <button 
                       data-testid="field-condition-button" 
                       class={`px-4 py-2 rounded text-sm font-medium transition-colors ${this.currentConditionType === 'field' ? 'bg-blue-600 text-white' : 'bg-green-100 text-green-800 hover:bg-green-200'}`}
+                      part="field-condition-button"
                       onClick={() => this.currentConditionType = 'field'}
                     >
-                      Field Condition
+                      <slot name="field-condition-text">Field Condition</slot>
                     </button>
                     <button 
                       data-testid="where-expression-button" 
                       class={`px-4 py-2 rounded text-sm font-medium transition-colors ${this.currentConditionType === 'where' ? 'bg-blue-600 text-white' : 'bg-green-100 text-green-800 hover:bg-green-200'}`}
+                      part="where-expression-button"
                       onClick={() => this.currentConditionType = 'where'}
                     >
-                      $where Expression
+                      <slot name="where-expression-text">$where Expression</slot>
                     </button>
                   </div>
                 </div>
                 
                 {this.currentConditionType === 'field' && (
-                  <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Select Field:</label>
-                    <div class="css-b62m3t-container">
+                  <div part="field-selector">
+                    <label class="block text-sm font-medium text-gray-700 mb-2" part="field-label">
+                      <slot name="field-label">Select Field:</slot>
+                    </label>
+                    <div class="css-b62m3t-container" part="field-dropdown-container">
                       <span id="react-select-7-live-region" class="css-1f43avz-a11yText-A11yText"></span>
                       <span aria-live="polite" aria-atomic="false" aria-relevant="additions text" role="log" class="css-1f43avz-a11yText-A11yText"></span>
                       <div class="field-selection-dropdown__control css-13cymwt-control">
@@ -482,6 +509,7 @@ export class QueryBuilder {
                           <div class="field-selection-dropdown__input-container css-19bb58m" data-value="">
                             <select 
                               class="field-selection-dropdown__input w-full p-2"
+                              part="field-select"
                               onChange={(e: any) => this.currentField = e.target.value}
                             >
                               <option value="" selected={!this.currentField}>Select Field...</option>
@@ -505,9 +533,11 @@ export class QueryBuilder {
                 )}
                 
                 {this.currentConditionType === 'field' && this.currentField && (
-                  <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Select Operator:</label>
-                    <div class="css-b62m3t-container">
+                  <div part="operator-selector">
+                    <label class="block text-sm font-medium text-gray-700 mb-2" part="operator-label">
+                      <slot name="operator-label">Select Operator:</slot>
+                    </label>
+                    <div class="css-b62m3t-container" part="operator-dropdown-container">
                       <span id="react-select-9-live-region" class="css-1f43avz-a11yText-A11yText"></span>
                       <span aria-live="polite" aria-atomic="false" aria-relevant="additions text" role="log" class="css-1f43avz-a11yText-A11yText"></span>
                       <div class="operator-selection-dropdown__control css-13cymwt-control">
@@ -518,6 +548,7 @@ export class QueryBuilder {
                           <div class="operator-selection-dropdown__input-container css-19bb58m" data-value="">
                             <select 
                               class="operator-selection-dropdown__input w-full p-2"
+                              part="operator-select"
                               onChange={(e: any) => this.currentOperator = e.target.value}
                             >
                               <option value="" selected={!this.currentOperator}>Select Operator...</option>
@@ -541,55 +572,69 @@ export class QueryBuilder {
                 )}
                 
                 {this.currentConditionType === 'field' && this.currentField && this.currentOperator && (
-                  <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Enter Value:</label>
+                  <div part="value-input-container">
+                    <label class="block text-sm font-medium text-gray-700 mb-2" part="value-label">
+                      <slot name="value-label">Enter Value:</slot>
+                    </label>
                     <input 
                       data-testid="value-input" 
                       placeholder="e.g., &quot;text&quot;, 25, [1, 2, 3], true" 
                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
+                      part="value-input"
                       type="text" 
                       value={this.currentValue}
                       onInput={(e: any) => this.currentValue = e.target.value}
                     />
-                    <p class="text-xs text-gray-500 mt-1">Tip: Use JSON format for arrays, objects, or boolean values</p>
+                    <p class="text-xs text-gray-500 mt-1" part="value-hint">
+                      <slot name="value-hint">Tip: Use JSON format for arrays, objects, or boolean values</slot>
+                    </p>
                   </div>
                 )}
                 
                 {this.currentConditionType === 'where' && (
-                  <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Enter Expression:</label>
+                  <div part="where-input-container">
+                    <label class="block text-sm font-medium text-gray-700 mb-2" part="where-label">
+                      <slot name="where-label">Enter Expression:</slot>
+                    </label>
                     <input 
                       placeholder="e.g., this.age > 25" 
                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
+                      part="where-input"
                       type="text" 
                       value={this.currentWhereExpression}
                       onInput={(e: any) => this.currentWhereExpression = e.target.value}
                     />
-                    <p class="text-xs text-gray-500 mt-1">Use "this" to refer to the document.</p>
+                    <p class="text-xs text-gray-500 mt-1" part="where-hint">
+                      <slot name="where-hint">Use "this" to refer to the document.</slot>
+                    </p>
                   </div>
                 )}
                 
                 {this.isAddFormReady() && (
-                  <div class="pt-2 flex space-x-2">
+                  <div class="pt-2 flex space-x-2" part="action-buttons">
                     <button 
                       class="flex-1 bg-blue-600 text-white py-2 rounded-lg" 
+                      part="add-and-button"
                       onClick={() => this.applyCondition('and')}
                     >
-                      Add to AND
+                      <slot name="add-and-text">Add to AND</slot>
                     </button>
                     <button 
                       class="flex-1 bg-orange-600 text-white py-2 rounded-lg" 
+                      part="add-or-button"
                       onClick={() => this.applyCondition('or')}
                     >
-                      Add to OR
+                      <slot name="add-or-text">Add to OR</slot>
                     </button>
                   </div>
                 )}
               </div>
               
-              <div class="bg-gray-900 text-gray-100 rounded-lg p-4">
-                <p class="text-sm font-semibold mb-2">Generated MongoDB Query:</p>
-                <pre class="text-sm overflow-x-auto">{this.value}</pre>
+              <div class="bg-gray-900 text-gray-100 rounded-lg p-4" part="query-output">
+                <p class="text-sm font-semibold mb-2" part="query-output-title">
+                  <slot name="query-output-title">Generated MongoDB Query:</slot>
+                </p>
+                <pre class="text-sm overflow-x-auto" part="query-output-content">{this.value}</pre>
               </div>
             </div>
           </div>
