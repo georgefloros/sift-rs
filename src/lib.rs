@@ -54,6 +54,9 @@ pub use operation_modules::logic_operations::{AndOperator, OrOperator, NorOperat
 pub use operation_modules::exists_operation::ExistsOperator;
 pub use operation_modules::regex_operation::RegexOperator;
 pub use operation_modules::mod_operation::ModOperator;
+#[cfg(feature = "server")]
+pub use operation_modules::where_operation::WhereOperator;
+#[cfg(not(feature = "server"))]
 pub use operation_modules::where_operation::WhereOperator;
 pub use operation_modules::type_operation::TypeOperator;
 

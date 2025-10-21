@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sift-rs WASM Demo</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .container {
+            margin: 20px 0;
+        }
+        label {
+            display: block;
+            margin: 10px 0 5px;
+        }
+        input, textarea {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+        }
+        button {
+            padding: 10px 15px;
+            margin: 5px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .result {
+            margin: 15px 0;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+        }
+        .error {
+            background-color: #f8d7da;
+            border-color: #f5c6cb;
+            color: #721c24;
+        }
+    </style>
+</head>
+<body>
+    <h1>Sift-rs WASM Demo</h1>
+    <p>This demo shows how to use the sift-rs library for MongoDB-style queries in the browser via WebAssembly.</p>
+
+    <div class="container">
+        <label for="query">Query (MongoDB-style):</label>
+        <textarea id="query" rows="4" placeholder='{"age": {"$gte": 30}}'>{"age": {"$gte": 30}}</textarea>
+        
+        <label for="value">Value to test:</label>
+        <textarea id="value" rows="6" placeholder='{"name": "Alice", "age": 32}'>{"name": "Alice", "age": 32}</textarea>
+        
+        <button onclick="testSift()">Test Sift</button>
+        <button onclick="validateQuery()">Validate Query</button>
+    </div>
+
+    <div class="container">
+        <label for="valuesArray">Array of Values to Test:</label>
+        <textarea id="valuesArray" rows="8" placeholder='[{"name": "Alice", "age": 32}, {"name": "Bob", "age": 25}]'>[{"name": "Alice", "age": 32}, {"name": "Bob", "age": 25}, {"name": "Charlie", "age": 35}]</textarea>
+        
+        <button onclick="testSiftMany()">Test Sift Many</button>
+    </div>
+
+    <div id="result" class="result" style="display:none;"></div>
+
+    <script type="module">
+        // Load the WASM module
+        import init, { sift, sift_many, validate_query, create_filter_fn } from './pkg/sift_rs_wasm.js';
+        
+        // Initialize the WASM module
+        async function loadWasm() {
+            try {
+                await init();
+                console.log('WASM module loaded successfully');
+            } catch (err) {
+                console.error('Error loading WASM module:', err);
+            }
+        }
+        
+        // Call the load function when the page loads
+        loadWasm();
+        
+        // Test function for single value
+        function testSift() {
+            const query = document.getElementById('query').value;
+            const value = document.getElementById('value').value;
+            const resultDiv = document.getElementById('result');
+            
+            try {
+                const matches = sift(query, value);
+                resultDiv.style.display = 'block';
+                resultDiv.className = 'result';
+                resultDiv.innerHTML = `<h3>Result:</h3><p>Value matches query: <strong>${matches}</strong></p>`;
+            } catch (err) {
+                resultDiv.style.display = 'block';
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = `<h3>Error:</h3><p>${err.message}</p>`;
+            }
+        }
+        
+        // Validate query function
+        function validateQuery() {
+            const query = document.getElementById('query').value;
+            const resultDiv = document.getElementById('result');
+            
+            try {
+                const valid = validate_query(query);
+                resultDiv.style.display = 'block';
+                resultDiv.className = 'result';
+                resultDiv.innerHTML = `<h3>Validation Result:</h3><p>Query is ${valid ? 'valid' : 'invalid'}</p>`;
+            } catch (err) {
+                resultDiv.style.display = 'block';
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = `<h3>Error:</h3><p>${err.message}</p>`;
+            }
+        }
+        
+        // Test function for multiple values
+        function testSiftMany() {
+            const query = document.getElementById('query').value;
+            const values = document.getElementById('valuesArray').value;
+            const resultDiv = document.getElementById('result');
+            
+            try {
+                const results = sift_many(query, values);
+                const resultsArray = JSON.parse(results);
+                resultDiv.style.display = 'block';
+                resultDiv.className = 'result';
+                resultDiv.innerHTML = `<h3>Results:</h3><p>Query: <code>${query}</code></p>
+                    <p>Results: <code>${JSON.stringify(resultsArray)}</code></p>
+                    <p>Matched items: ${resultsArray.filter(r => r).length} out of ${resultsArray.length}</p>`;
+            } catch (err) {
+                resultDiv.style.display = 'block';
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = `<h3>Error:</h3><p>${err.message}</p>`;
+            }
+        }
+    </script>
+</body>
+</html>

@@ -14,17 +14,40 @@ serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 regex = "1.0"
 chrono = { version = "0.4", features = ["serde"] }
-# Axum web framework dependencies
-axum = "0.8.4"
-tokio = { version = "1.47.0", features = ["full"] }
-tower = "0.5.2"
-tower-http = { version = "0.6.6", features = ["cors"] }
-tracing = "0.1"
-tracing-subscriber = "0.3"
-rustyscript = { git = "https://github.com/rscarson/rustyscript.git", branch = "master" }
+# Axum web framework dependencies (only for server functionality)
+axum = { version = "0.8.4", optional = true }
+tokio = { version = "1.47.0", features = ["full"], optional = true }
+tower = { version = "0.5.2", optional = true }
+tower-http = { version = "0.6.6", features = ["cors"], optional = true }
+tracing = { version = "0.1", optional = true }
+tracing-subscriber = { version = "0.3", optional = true }
+boa_engine = { version = "0.20.0", default-features = false }
+boa_gc = { version = "0.20.0" }
+boa_interner = { version = "0.20.0" }
+boa_parser = { version = "0.20.0" }
+boa_ast = { version = "0.20.0" }
+getrandom = { version = "0.2", optional = true, features = ["js"] }
+
+[features]
+default = ["server"]
+server = [
+    "dep:axum",
+    "dep:tokio", 
+    "dep:tower",
+    "dep:tower-http",
+    "dep:tracing",
+    "dep:tracing-subscriber",
+]
+
+wasm = [
+    "dep:getrandom",
+]
+
+
+
 [dev-dependencies]
 tokio-test = "0.4"
-reqwest = { version = "0.12.22", features = ["json"] }
+reqwest = { version = "0.12.23", features = ["json"] }
 criterion = { version = "0.7.0", features = ["html_reports"] }
 
 [[example]]
@@ -38,3 +61,15 @@ path = "examples/comprehensive_examples.rs"
 [[bench]]
 name = "sift_benchmarks"
 harness = false
+
+[[bin]]
+name = "sift-rs-server"
+path = "src/bin/server.rs"
+required-features = ["server"]
+
+[workspace]
+members = [
+    ".",
+    "sift-rs-wasm",
+    "chat-backend"
+]

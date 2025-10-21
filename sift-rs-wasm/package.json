@@ -1,0 +1,31 @@
+{
+  "name": "@sift-rs/wasm",
+  "version": "0.1.0",
+  "description": "WebAssembly bindings for sift-rs - MongoDB query filtering in Rust",
+  "main": "index.js",
+  "types": "index.d.ts",
+  "scripts": {
+    "build": "wasm-pack build --target web --out-dir pkg",
+    "build-node": "wasm-pack build --target nodejs --out-dir pkg",
+    "build-both": "wasm-pack build --target web --out-dir pkg && wasm-pack build --target nodejs --out-dir pkg-node",
+    "dev": "wasm-pack build --target web --out-dir pkg --dev"
+  },
+  "keywords": [
+    "mongodb",
+    "query",
+    "filter",
+    "database",
+    "json",
+    "webassembly",
+    "wasm"
+  ],
+  "author": "Your Name <your.email@example.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/georgefloros/sift-rs"
+  },
+  "devDependencies": {
+    "wasm-pack": "^0.12.1"
+  }
+}
