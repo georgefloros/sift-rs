@@ -213,6 +213,18 @@ pub mod utils {
             return Some(ordering);
         }
 
+        let parse_numeric = |value: &Value| -> Option<f64> {
+            match value {
+                Value::Number(num) => num.as_f64(),
+                Value::String(text) => text.parse::<f64>().ok(),
+                _ => None,
+            }
+        };
+
+        if let (Some(a_num), Some(b_num)) = (parse_numeric(a), parse_numeric(b)) {
+            return a_num.partial_cmp(&b_num);
+        }
+
         // Try date comparison if both are strings
         match (a, b) {
             (Value::String(a_str), Value::String(b_str)) => {

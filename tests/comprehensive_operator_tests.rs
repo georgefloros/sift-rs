@@ -156,6 +156,30 @@ mod comprehensive_tests {
         assert_eq!(lte_results.len(), 2); // Alice and Charlie
     }
 
+    #[test]
+    fn test_gte_with_numeric_strings() {
+        let data = vec![
+            json!({"value": 5}),
+            json!({"value": 5.3}),
+            json!({"value": "5"}),
+            json!({"value": "5.3"}),
+            json!({"value": "4.9"}),
+        ];
+
+        let gte_int_query = json!({"value": {"$gte": "5"}});
+        let gte_float_query = json!({"value": {"$gte": "5.3"}});
+
+        let gte_int_results: Vec<_> = data.iter()
+            .filter(|item| sift(&gte_int_query, item).unwrap())
+            .collect();
+        assert_eq!(gte_int_results.len(), 4); // 5, 5.3, "5", "5.3"
+
+        let gte_float_results: Vec<_> = data.iter()
+            .filter(|item| sift(&gte_float_query, item).unwrap())
+            .collect();
+        assert_eq!(gte_float_results.len(), 2); // 5.3 and "5.3"
+    }
+
     // Test 2: Array Operators
     #[test]
     fn test_array_operators() {
