@@ -180,6 +180,23 @@ mod comprehensive_tests {
         assert_eq!(gte_float_results.len(), 2); // 5.3 and "5.3"
     }
 
+    #[test]
+    fn test_ne_with_numeric_strings() {
+        let data = vec![
+            json!({"value": 5}),
+            json!({"value": "5"}),
+            json!({"value": "5.0"}),
+            json!({"value": 6}),
+        ];
+
+        let ne_query = json!({"value": {"$ne": "5"}});
+        let ne_results: Vec<_> = data.iter()
+            .filter(|item| sift(&ne_query, item).unwrap())
+            .collect();
+
+        assert_eq!(ne_results.len(), 1); // Only 6
+    }
+
     // Test 2: Array Operators
     #[test]
     fn test_array_operators() {

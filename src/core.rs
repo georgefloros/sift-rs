@@ -165,6 +165,18 @@ pub mod utils {
 
     /// Compare two values for equality, handling different JSON types appropriately
     pub fn values_equal(a: &Value, b: &Value) -> bool {
+        let parse_numeric = |value: &Value| -> Option<f64> {
+            match value {
+                Value::Number(num) => num.as_f64(),
+                Value::String(text) => text.parse::<f64>().ok(),
+                _ => None,
+            }
+        };
+
+        if let (Some(a_num), Some(b_num)) = (parse_numeric(a), parse_numeric(b)) {
+            return (a_num - b_num).abs() < f64::EPSILON;
+        }
+
         match (a, b) {
             (Value::Null, Value::Null) => true,
             (Value::Bool(a), Value::Bool(b)) => a == b,
